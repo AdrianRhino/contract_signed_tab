@@ -8,51 +8,14 @@ import {
   Flex,
   hubspot,
   Heading,
+  TextArea,
+  Select,
+  DateInput,
+  Checkbox,
+  NumberInput
 } from "@hubspot/ui-extensions";
 
 import fields from "./config/fields.json";
-
-// 1. Define your field structure
-//    → Make a JSON file with sections + fields
-
-// 2. Load and show the JSON
-//    → Map each section and field to the screen (text-only first)
-
-// 3. Ask ChatGPT to follow the format
-//    → Use it to help clean, expand, or convert into shapes
-
-// 4. Generate the correct input components
-//    → Match each property type to the right UI element
-
-// 5. Add property options (e.g., dropdowns, radios)
-//    → Use the JSON config to render dynamic choices
-
-// 6. Store all input values in state
-//    → Use useState or a single state object keyed by field
-
-// 7. Add conditionals or visibility rules (optional)
-//    → Show/hide fields based on earlier answers
-
-// 8. Save all values
-//    → On submit, send state to a serverless save function
-
-// 9. Load initial values
-//    → On mount, fetch deal data and populate the form
-
-// 10. Pull everything dynamically from HubSpot
-//     → Use serverless functions to get property values or deal details
-
-// 11. Add validation for required fields
-
-// 12. Auto-save as user types (instead of submit)
-
-// 13. Add JSON-driven visibility rules (like if X is true, show Y)
-
-// 14. Connect to workflows or alerts (e.g. send reminder if incomplete)
-
-// 15. Sync different users' changes to the same deal
-
-
 
 // Define the extension to be run within the Hubspot CRM
 hubspot.extend(({ context, runServerlessFunction, actions }) => (
@@ -66,6 +29,8 @@ hubspot.extend(({ context, runServerlessFunction, actions }) => (
 // Define the Extension component, taking in runServerless, context, & sendAlert as props
 const Extension = ({ context, runServerless, sendAlert }) => {
   const [text, setText] = useState("");
+  const [formValues, setFormValues] = useState({});
+  const [dateValue, setDateValue] = useState();
 
   // Call serverless function to execute with parameters.
   // The `myFunc` function name is configured inside `serverless.json`
@@ -87,15 +52,57 @@ const Extension = ({ context, runServerless, sendAlert }) => {
 
           {section.fields.map((field) => (
             <>
-              <Text>{field.label}</Text>
               {/* Render your input here (Input, Dropdown, etc.) */}
+              {field.type === "Multi-line text" ? (
+                <TextArea
+                  label={field.label}
+                  name={field.key}
+                  value={formValues[field.key] || ""}
+                  onInput={(val) => handleChange(field.key, val)}
+                />
+              ) : field.type === "dropdown" ? (
+                <Select
+                  label={field.label}
+                  name={field.key}
+                  options={field.options}
+                  value={formValues[field.key]}
+                  onChange={(val) => handleChange(field.key, val)}
+                />
+              ) : field.type === "number" ? (
+                <NumberInput label={field.label} />
+              ) : field.type === "checkbox" ? (
+                <Checkbox
+                  name="adminCheck"
+                >
+                  {field.label}
+                </Checkbox>
+              ) : field.type === "date" ? (
+                <DateInput
+                  label={field.label}
+                  name="date"
+                  onChange={(value) => {
+                    setDateValue(value);
+                  }}
+                  value={dateValue}
+                  format="ll"
+                />
+              ) : field.type === "Single-line text" ? (
+                <Input label={field.label} />
+              ) : field.type === "File" ? (
+                <Text>{`${field.label} + file`}</Text>
+              ) : (
+                <Text>No Type Associated</Text>
+              )}
+              
             </>
           ))}
+          <Divider />
         </>
       ))}
       <Text>
         <Text>This is Dev</Text>
       </Text>
+      <Button onClick={() => console.log('Saved...')}>Save</Button>
     </>
   );
 };

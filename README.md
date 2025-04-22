@@ -15,3 +15,44 @@ There are a few things that must be set up before you can make use of this getti
 The HubSpot CLI enables you to run this project locally so that you may test and iterate quickly. Getting started is simple, just run this HubSpot CLI command in your project directory and follow the prompts:
 
 `hs project dev`
+
+
+// 1. Define your field structure
+//    → Make a JSON file with sections + fields
+
+// 2. Load and show the JSON
+//    → Map each section and field to the screen (text-only first)
+
+// 3. Ask ChatGPT to follow the format
+//    → Use it to help clean, expand, or convert into shapes
+
+// 4. Generate the correct input components
+//    → Match each property type to the right UI element
+
+// 5. Add property options (e.g., dropdowns, radios)
+//    → Use the JSON config to render dynamic choices
+
+// 6. Store all input values in state
+//    → Use useState or a single state object keyed by field
+
+// 7. Add conditionals or visibility rules (optional)
+//    → Show/hide fields based on earlier answers
+
+// 8. Save all values
+//    → On submit, send state to a serverless save function
+
+// 9. Load initial values
+//    → On mount, fetch deal data and populate the form
+
+// 10. Pull everything dynamically from HubSpot
+//     → Use serverless functions to get property values or deal details
+
+// 11. Add validation for required fields
+
+// 12. Auto-save as user types (instead of submit)
+
+// 13. Add JSON-driven visibility rules (like if X is true, show Y)
+
+// 14. Connect to workflows or alerts (e.g. send reminder if incomplete)
+
+// 15. Sync different users' changes to the same deal
