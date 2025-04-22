@@ -32,16 +32,6 @@ const Extension = ({ context, runServerless, sendAlert }) => {
   const [dateValue, setDateValue] = useState();
   const [fieldConfig, setFieldConfig] = useState(fields); // ✅ Track enriched field config
 
-  useEffect(() => {
-    const test = async () => {
-      const response = await runServerless({
-        name: "getDealDropdownOptions",
-        parameters: { properties: ["what_warranty_"] }
-      })
-    }
-    test();
-   
-  })
 
   // Extract all dropdown property keys
   const getDropdownKeys = (sections) => {

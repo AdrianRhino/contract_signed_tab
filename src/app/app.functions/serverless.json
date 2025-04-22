@@ -3,10 +3,6 @@
     "myFunc": {
       "file": "example-function.js",
       "secrets": []
-    },
-    "getDealDropOptions": {
-      "file": "getDealDropOptions.js",
-      "secrets": []
     }
   }
 }
