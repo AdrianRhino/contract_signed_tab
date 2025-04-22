@@ -32,7 +32,7 @@ const Extension = ({ context, runServerless, sendAlert }) => {
   return (
     <>
       <Text>
-        <Text>This is a test</Text>
+        <Text>This is Dev</Text>
         <Text format={{ fontWeight: "bold" }}>
           Your first UI extension is ready!
         </Text>
