@@ -1,43 +1,312 @@
 [
     {
-      "section": "Overview",
+      "section": "Contract Overview",
       "fields": [
         {
-          "key": "roof_type",
-          "label": "Roof Type",
-          "type": "dropdown",
-          "required": true,
-          "options": ["Shingle", "Metal", "Tile"]
+          "key": "project_sold_date",
+          "label": "Project Sold Date",
+          "type": "date",
+          "required": false
         },
         {
-          "key": "inspection_notes",
-          "label": "Inspection Notes",
-          "type": "textarea",
+          "key": "job_type",
+          "label": "Job Type",
+          "type": "checkbox",
+          "required": false
+        },
+        {
+          "key": "amount",
+          "label": "Amount",
+          "type": "number",
+          "required": false
+        },
+        {
+          "key": "pipeline",
+          "label": "Pipeline",
+          "type": "dropdown",
+          "required": false
+        },
+        {
+          "key": "dealstage",
+          "label": "Deal Stage",
+          "type": "dropdown",
+          "required": false
+        },
+        {
+          "key": "number_of_associated_claims",
+          "label": "Number of Claims",
+          "type": "text",
+          "required": false
+        },
+        {
+          "key": "total_number_of_associated_change_orders",
+          "label": "Number of Change Orders",
+          "type": "text",
+          "required": false
+        },
+        {
+          "key": "financed",
+          "label": "Is there any financing on this deal?",
+          "type": "dropdown",
           "required": false
         }
       ]
     },
     {
-      "section": "Round One",
+      "section": "Financing - Round 1",
       "fields": [
         {
-          "key": "qa_complete",
-          "label": "QA Complete",
+          "key": "financed_amount",
+          "label": "Financed Amount (1)",
+          "type": "number",
+          "required": false
+        },
+        {
+          "key": "date_financed",
+          "label": "Loan Signed Date (1)",
+          "type": "date",
+          "required": false
+        },
+        {
+          "key": "finance_options",
+          "label": "Finance Options (1)",
+          "type": "dropdown",
+          "required": false
+        },
+        {
+          "key": "financing_documentation",
+          "label": "Finance Documentation (1)",
+          "type": "file",
+          "required": false
+        },
+        {
+          "key": "loan_account_number",
+          "label": "Loan Account Number (1)",
+          "type": "Multi-line text",
+          "required": false
+        },
+        {
+          "key": "loan_applicant_name",
+          "label": "Loan Applicant Name (1)",
+          "type": "Multi-line text",
+          "required": false
+        },
+        {
+          "key": "more_financing_needed",
+          "label": "Is a SECOND round of financing needed?",
           "type": "checkbox",
-          "required": true
+          "required": false
         }
       ]
     },
     {
-      "section": "Round Two",
+      "section": "Financing - Round 2",
       "fields": [
         {
-          "key": "final_review_notes",
-          "label": "Final Review Notes",
-          "type": "textarea",
+          "key": "financed_amount_2",
+          "label": "Financed Amount (2)",
+          "type": "number",
+          "required": false
+        },
+        {
+          "key": "date_financed_2",
+          "label": "Loan Signed Date (2)",
+          "type": "date",
+          "required": false
+        },
+        {
+          "key": "finance_options_2",
+          "label": "Finance Options (2)",
+          "type": "dropdown",
+          "required": false
+        },
+        {
+          "key": "financing_documentation_2",
+          "label": "Finance Documentation (2)",
+          "type": "file",
+          "required": false
+        },
+        {
+          "key": "loan_account_number_2",
+          "label": "Loan Account Number (2)",
+          "type": "Multi-line text",
+          "required": false
+        },
+        {
+          "key": "loan_applicant_name_2",
+          "label": "Loan Account Name (2)",
+          "type": "Multi-line text",
+          "required": false
+        },
+        {
+          "key": "more_financing_needed_2",
+          "label": "Is a THIRD round of financing needed?",
+          "type": "checkbox",
+          "required": false
+        }
+      ]
+    },
+    {
+      "section": "Home Owners Association",
+      "fields": [
+        {
+          "key": "lead_intake_hoa",
+          "label": "Does the home owner have an HOA?",
+          "type": "dropdown",
+          "required": false
+        },
+        {
+          "key": "hoa_approval_letter",
+          "label": "HOA Approval Letter",
+          "type": "file",
+          "required": false
+        },
+        {
+          "key": "hoa_name",
+          "label": "Name of HOA",
+          "type": "Multi-line text",
+          "required": false
+        },
+        {
+          "key": "hoa_notes",
+          "label": "HOA Notes",
+          "type": "Multi-line text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "section": "Insurance Payment Terms",
+      "fields": [
+        {
+          "key": "insurance_deductible_notes",
+          "label": "Deductible Terms (INSURANCE)",
+          "type": "Multi-line text",
+          "required": false
+        },
+        {
+          "key": "insurance_upgrade_notes",
+          "label": "Upgrade Terms (INSURANCE)",
+          "type": "Multi-line text",
+          "required": false
+        },
+        {
+          "key": "insurance_net_claim_notes",
+          "label": "Net Claim / Material Delivery Terms (INSURANCE)",
+          "type": "Multi-line text",
+          "required": false
+        },
+        {
+          "key": "insurance_depreciation_notes",
+          "label": "Depreciation / Final Payment Terms (INSURANCE)",
+          "type": "Multi-line text",
+          "required": false
+        },
+        {
+          "key": "insurance_change_order_notes",
+          "label": "Change Order (Final Payment)",
+          "type": "Multi-line text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "section": "Retail Payment Terms",
+      "fields": [
+        {
+          "key": "retail_downpayment_notes",
+          "label": "Downpayment Terms (RETAIL)",
+          "type": "Multi-line text",
+          "required": false
+        },
+        {
+          "key": "retail_material_delivery_notes",
+          "label": "Material Delivery Terms (RETAIL)",
+          "type": "Multi-line text",
+          "required": false
+        },
+        {
+          "key": "retail_upgrade_notes",
+          "label": "Upgrades Terms (RETAIL)",
+          "type": "Multi-line text",
+          "required": false
+        },
+        {
+          "key": "retail_final_payment_notes",
+          "label": "Final Payment (RETAIL)",
+          "type": "Multi-line text",
+          "required": false
+        },
+        {
+          "key": "retail_payment_term_notes",
+          "label": "Payment Term Notes (RETAIL)",
+          "type": "Multi-line text",
+          "required": false
+        },
+        {
+          "key": "homeowner_understands_payment_terms",
+          "label": "Does homeowner understand the payment terms?",
+          "type": "checkbox",
+          "required": false
+        },
+        {
+          "key": "homeowner_payment_term_questions",
+          "label": "Does the homeowner have any payment term questions?",
+          "type": "Multi-line text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "section": "Supplement Terms (INSURANCE)***",
+      "fields": [
+        {
+          "key": "pwi_items",
+          "label": "PWI Items",
+          "type": "Multi-line text",
+          "required": false
+        },
+        {
+          "key": "net_claim_endorsed",
+          "label": "Has the net claim been endorsed by mortgage company?",
+          "type": "checkbox",
+          "required": false
+        },
+        {
+          "key": "insurance_payment_term_notes",
+          "label": "Insurance Payment Notes",
+          "type": "Multi-line text",
+          "required": false
+        },
+        {
+          "key": "homeowner_understands_payment_terms",
+          "label": "Does homeowner understand the payment terms?",
+          "type": "checkbox",
+          "required": false
+        },
+        {
+          "key": "homeowner_payment_term_questions",
+          "label": "Does the homeowner have any payment term questions?",
+          "type": "Multi-line text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "section": "Warranty Information",
+      "fields": [
+        {
+          "key": "what_warranty_",
+          "label": "What Warranty?",
+          "type": "dropdown",
+          "required": false
+        },
+        {
+          "key": "what_name_should_be_printed_on_the_warranty_",
+          "label": "What name should be printed on the warranty?",
+          "type": "Multi-line text",
           "required": false
         }
       ]
     }
   ]
-  
