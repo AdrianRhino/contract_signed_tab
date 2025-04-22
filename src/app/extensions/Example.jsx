@@ -12,7 +12,7 @@ import {
   Select,
   DateInput,
   Checkbox,
-  NumberInput
+  NumberInput,
 } from "@hubspot/ui-extensions";
 
 import fields from "./config/fields.json";
@@ -28,18 +28,16 @@ hubspot.extend(({ context, runServerlessFunction, actions }) => (
 
 // Define the Extension component, taking in runServerless, context, & sendAlert as props
 const Extension = ({ context, runServerless, sendAlert }) => {
-  const [text, setText] = useState("");
+  
   const [formValues, setFormValues] = useState({});
   const [dateValue, setDateValue] = useState();
 
-  // Call serverless function to execute with parameters.
-  // The `myFunc` function name is configured inside `serverless.json`
-  const handleClick = async () => {
-    const { response } = await runServerless({
-      name: "myFunc",
-      parameters: { text: text },
+  const handleChange = (key, value) => {
+    setFormValues((prev) => {
+      const updated = { ...prev, [key]: value };
+      console.log("Updated form values:", updated);
+      return updated;
     });
-    sendAlert({ message: response });
   };
 
   return (
@@ -58,6 +56,7 @@ const Extension = ({ context, runServerless, sendAlert }) => {
                   label={field.label}
                   name={field.key}
                   value={formValues[field.key] || ""}
+                  placeholder={`Enter ${field.label}`}
                   onInput={(val) => handleChange(field.key, val)}
                 />
               ) : field.type === "dropdown" ? (
@@ -66,13 +65,18 @@ const Extension = ({ context, runServerless, sendAlert }) => {
                   name={field.key}
                   options={field.options}
                   value={formValues[field.key]}
+                  placeholder={`Enter ${field.label}`}
                   onChange={(val) => handleChange(field.key, val)}
                 />
               ) : field.type === "number" ? (
-                <NumberInput label={field.label} />
+                <NumberInput
+                  label={field.label}
+                  placeholder={`Enter ${field.label}`}
+                />
               ) : field.type === "checkbox" ? (
                 <Checkbox
                   name="adminCheck"
+                  onChange={(val) => handleChange(field.key, val)}
                 >
                   {field.label}
                 </Checkbox>
@@ -80,20 +84,21 @@ const Extension = ({ context, runServerless, sendAlert }) => {
                 <DateInput
                   label={field.label}
                   name="date"
-                  onChange={(value) => {
-                    setDateValue(value);
-                  }}
+                  onChange={(val) => handleChange(field.key, val)}
                   value={dateValue}
-                  format="ll"
+                  format="long"
                 />
               ) : field.type === "Single-line text" ? (
-                <Input label={field.label} />
-              ) : field.type === "File" ? (
+                <Input
+                  label={field.label}
+                  placeholder={`Enter ${field.label}`}
+                  onChange={(val) => handleChange(field.key, val)}
+                />
+              ) : field.type === "file" ? (
                 <Text>{`${field.label} + file`}</Text>
               ) : (
                 <Text>No Type Associated</Text>
               )}
-              
             </>
           ))}
           <Divider />
@@ -102,7 +107,7 @@ const Extension = ({ context, runServerless, sendAlert }) => {
       <Text>
         <Text>This is Dev</Text>
       </Text>
-      <Button onClick={() => console.log('Saved...')}>Save</Button>
+      <Button onClick={() => console.log("Saved...")}>Save</Button>
     </>
   );
 };

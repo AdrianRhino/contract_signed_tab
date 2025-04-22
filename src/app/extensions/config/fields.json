@@ -276,7 +276,7 @@
       {
         "key": "hoa_approval_letter",
         "label": "HOA Approval Letter",
-        "type": "File",
+        "type": "file",
         "required": false
       },
       {
