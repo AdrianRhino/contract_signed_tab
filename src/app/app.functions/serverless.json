@@ -3,6 +3,10 @@
     "myFunc": {
       "file": "example-function.js",
       "secrets": []
+    },
+    "getDealDropdownOptions": {
+      "file": "getDealDropdownOptions.js",
+      "secrets": ["HUBSPOT_API_KEY"]
     }
   }
 }
