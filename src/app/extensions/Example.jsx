@@ -32,6 +32,17 @@ const Extension = ({ context, runServerless, sendAlert }) => {
   const [dateValue, setDateValue] = useState();
   const [fieldConfig, setFieldConfig] = useState(fields); // ✅ Track enriched field config
 
+  useEffect(() => {
+    const test = async () => {
+      const response = await runServerless({
+        name: "getDealDropdownOptions",
+        parameters: { properties: ["what_warranty_"] }
+      })
+    }
+    test();
+   
+  })
+
   // Extract all dropdown property keys
   const getDropdownKeys = (sections) => {
     return sections
@@ -39,47 +50,6 @@ const Extension = ({ context, runServerless, sendAlert }) => {
       .filter((field) => field.type === "dropdown")
       .map((field) => field.key);
   };
-
-  // Fetch dropdown options on mount
-  useEffect(() => {
-    const loadDropdownOptions = async () => {
-      const dropdownKeys = getDropdownKeys(fields);
-
-      if (!dropdownKeys.length) return;
-
-      try {
-        const response = await runServerless({
-          name: "getDealDropdownOptions",
-          parameters: {
-            properties: dropdownKeys,
-          },
-        });
-
-        if (response?.optionsByProperty) {
-          const enriched = fields.map((section) => ({
-            ...section,
-            fields: section.fields.map((field) => ({
-              ...field,
-              options:
-                field.type === "dropdown"
-                  ? response.optionsByProperty[field.key] || []
-                  : field.options,
-            })),
-          }));
-
-          setFieldConfig(enriched);
-        }
-      } catch (error) {
-        console.error("❌ Failed to fetch dropdown options:", error);
-        sendAlert({
-          message: "Failed to load dropdown options from HubSpot.",
-          type: "error",
-        });
-      }
-    };
-
-    loadDropdownOptions();
-  }, []);
 
   const handleChange = (key, value) => {
     setFormValues((prev) => {
