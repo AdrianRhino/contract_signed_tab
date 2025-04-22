@@ -1,0 +1,43 @@
+[
+    {
+      "section": "Overview",
+      "fields": [
+        {
+          "key": "roof_type",
+          "label": "Roof Type",
+          "type": "dropdown",
+          "required": true,
+          "options": ["Shingle", "Metal", "Tile"]
+        },
+        {
+          "key": "inspection_notes",
+          "label": "Inspection Notes",
+          "type": "textarea",
+          "required": false
+        }
+      ]
+    },
+    {
+      "section": "Round One",
+      "fields": [
+        {
+          "key": "qa_complete",
+          "label": "QA Complete",
+          "type": "checkbox",
+          "required": true
+        }
+      ]
+    },
+    {
+      "section": "Round Two",
+      "fields": [
+        {
+          "key": "final_review_notes",
+          "label": "Final Review Notes",
+          "type": "textarea",
+          "required": false
+        }
+      ]
+    }
+  ]
+  
