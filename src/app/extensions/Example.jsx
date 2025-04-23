@@ -31,11 +31,41 @@ const Extension = ({ context, runServerless, sendAlert }) => {
   const [formValues, setFormValues] = useState({});
   const [dateValue, setDateValue] = useState();
   const [fieldConfig, setFieldConfig] = useState(fields); // ✅ Track enriched field config
+  const [dropdownOptions, setDropdownOptions] = useState({});
+
+  useEffect(() => {
+    const loadDropdownOptions = async () => {
+      const dropdownKeys = getDropdownKeys(fieldConfig);
+
+      if (!dropdownKeys.length) return;
+
+      const response = await runServerless({
+        name: "myFunc",
+        parameters: {
+          properties: dropdownKeys,
+        }
+      });
+      console.log("Dropdown Keys:", dropdownKeys)
+      console.log("Response:", response)
+      if (response?.optionsByProperty) {
+        setDropdownOptions(response.optionsByProperty)
+      }
+    };
+
+    loadDropdownOptions();
+  }, [])
+
+  // Call serverless function to execute with parameters.
+  // The `myFunc` function name is configured inside `serverless.json`
+  const handleClick = async () => {
+    const { response } = await runServerless({ name: "myFunc", parameters: { properties: formValues } });
+    sendAlert({ message: response });
+  };
 
 
   // Extract all dropdown property keys
-  const getDropdownKeys = (sections) => {
-    return sections
+  const getDropdownKeys = (config) => {
+    return config
       .flatMap((section) => section.fields)
       .filter((field) => field.type === "dropdown")
       .map((field) => field.key);
@@ -71,7 +101,7 @@ const Extension = ({ context, runServerless, sendAlert }) => {
                 <Select
                   label={field.label}
                   name={field.key}
-                  options={field.options || []}
+                  options={"Testing" || []}
                   value={formValues[field.key]}
                   placeholder={`Choose ${field.label}`}
                   onChange={(val) => handleChange(field.key, val)}
@@ -118,8 +148,9 @@ const Extension = ({ context, runServerless, sendAlert }) => {
       <Text>
         <Text>This is Dev</Text>
       </Text>
+      <Button onClick={handleClick}>Testing</Button>
 
-      <Button onClick={() => console.log("Saved...", formValues)}>Save</Button>
+      <Button onClick={() => console.log("Saved...", dropdownOptions)}>Save</Button>
     </>
   );
 };
