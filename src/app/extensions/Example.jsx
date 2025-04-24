@@ -47,8 +47,8 @@ const Extension = ({ context, runServerless, sendAlert }) => {
       });
       console.log("Dropdown Keys:", dropdownKeys)
       console.log("Response:", response)
-      if (response?.optionsByProperty) {
-        setDropdownOptions(response.optionsByProperty)
+      if (response.response?.optionsByProperty) {
+        setDropdownOptions(response.response.optionsByProperty)
       }
     };
 
@@ -101,7 +101,7 @@ const Extension = ({ context, runServerless, sendAlert }) => {
                 <Select
                   label={field.label}
                   name={field.key}
-                  options={"Testing" || []}
+                  options={dropdownOptions[field.key] || []}
                   value={formValues[field.key]}
                   placeholder={`Choose ${field.label}`}
                   onChange={(val) => handleChange(field.key, val)}
