@@ -35,13 +35,13 @@
       {
         "key": "number_of_associated_claims",
         "label": "Number of Claims",
-        "type": "Single-line text",
+        "type": "read-only",
         "required": false
       },
       {
         "key": "total_number_of_associated_change_orders",
         "label": "Number of Change Orders",
-        "type": "Single-line text",
+        "type": "read-only",
         "required": false
       },
       {

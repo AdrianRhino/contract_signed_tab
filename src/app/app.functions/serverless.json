@@ -7,6 +7,10 @@
     "saveDealProperties": {
       "file": "saveDealProperties.js",
       "secrets": []
+    },
+    "getDealProperties": {
+      "file": "getDealProperties.js",
+      "secrets": []
     }
   }
 }
