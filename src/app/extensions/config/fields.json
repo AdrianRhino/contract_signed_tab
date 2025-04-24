@@ -54,6 +54,11 @@
   },
   {
     "section": "Financing - Round 1",
+    "condition": {
+      "key": "financed",
+      "notEquals": "Not Financed",
+      "includesUnset": true
+    },
     "fields": [
       {
         "key": "financed_amount",
@@ -101,6 +106,10 @@
   },
   {
     "section": "Financing - Round 2",
+    "condition": {
+      "key": "more_financing_needed",
+      "equals": true
+    },
     "fields": [
       {
         "key": "financed_amount_2",
@@ -148,6 +157,10 @@
   },
   {
     "section": "Insurance Payment Terms",
+    "condition": {
+      "key": "pipeline",
+      "equals": "21960027"
+    },
     "fields": [
       {
         "key": "insurance_deductible_notes",
@@ -219,6 +232,10 @@
   },
   {
     "section": "Retail Payment Terms",
+    "condition": {
+      "key": "pipeline",
+      "equals": "22071991"
+    },
     "fields": [
       {
         "key": "retail_downpayment_notes",
