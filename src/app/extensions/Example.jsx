@@ -13,6 +13,7 @@ import {
   DateInput,
   Checkbox,
   NumberInput,
+  MultiSelect,
 } from "@hubspot/ui-extensions";
 
 import fields from "./config/fields.json";
@@ -100,6 +101,72 @@ const Extension = ({ context, runServerless, sendAlert }) => {
     return true; // Default to show if unknown
   };
 
+  const sanitizeFormValues = (values) => {
+    return Object.fromEntries(
+      Object.entries(values).map(([key, val]) => [key, normalizeValue(val)])
+    );
+  };
+
+  const normalizeValue = (val) => {
+    if (val === undefined || val === null) return null;
+  
+    // Handle dropdowns or selects with `{ label, value }`
+    if (typeof val === "object" && "value" in val) {
+      return val.value;
+    }
+  
+    // Handle date objects like `{ year, month, day }`
+    if (typeof val === "object" && isDateObject(val)) {
+      return convertDateObject(val); // returns "YYYY-MM-DD"
+    }
+  
+    // Handle checkboxes (booleans)
+    if (typeof val === "boolean") {
+      return val;
+    }
+  
+    // Handle all other primitives (strings, numbers)
+    return val;
+  };
+  
+  const isDateObject = (val) =>
+    typeof val.year === "number" &&
+    typeof val.month === "number" &&
+    (typeof val.day === "number" || typeof val.date === "number");
+  
+    const convertDateObject = (val) => {
+      try {
+        const day = val.day ?? val.date; // support both
+        const date = new Date(val.year, val.month - 1, day);
+        return date.toISOString().split("T")[0]; // "YYYY-MM-DD"
+      } catch {
+        return null;
+      }
+    };
+
+  const handleSave = async () => {
+    // Transform values before sending to HubSpot
+    const cleanValues = sanitizeFormValues(formValues);
+  
+    console.log("🧼 Cleaned values to save:", cleanValues);
+  
+    const response = await runServerless({
+      name: "saveDealProperties",
+      parameters: {
+        dealId: context?.crm?.objectId,
+        updates: cleanValues,
+      },
+    });
+
+    console.log("This is the response:", response)
+  
+    if (response?.error) {
+      sendAlert({ message: "❌ Failed to save data", type: "error" });
+    } else {
+      sendAlert({ message: "✅ Saved successfully", type: "success" });
+    }
+  };
+
   return (
     <>
       {fieldConfig.map((section, i) => {
@@ -133,6 +200,7 @@ const Extension = ({ context, runServerless, sendAlert }) => {
                 ) : field.type === "number" ? (
                   <NumberInput
                     label={field.label}
+                    readOnly={true}
                     placeholder={`Enter ${field.label}`}
                     onChange={(val) => handleChange(field.key, val)}
                   />
@@ -172,9 +240,8 @@ const Extension = ({ context, runServerless, sendAlert }) => {
       <Text>
         <Text>This is Dev</Text>
       </Text>
-      <Button onClick={handleClick}>Testing</Button>
-
-      <Button onClick={() => console.log("Saved...", dropdownOptions)}>
+      <Button onClick={() => console.log("THis is the context", context.crm.objectId)}>Print Context</Button>
+      <Button onClick={handleSave}>
         Save
       </Button>
     </>

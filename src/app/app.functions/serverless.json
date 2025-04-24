@@ -3,6 +3,10 @@
     "myFunc": {
       "file": "example-function.js",
       "secrets": []
+    },
+    "saveDealProperties": {
+      "file": "saveDealProperties.js",
+      "secrets": []
     }
   }
 }
