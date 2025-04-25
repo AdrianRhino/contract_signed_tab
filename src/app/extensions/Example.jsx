@@ -34,7 +34,6 @@ const Extension = ({
   context,
   runServerless,
   sendAlert,
-  actions,
   fetchCrmObjectProperties,
   refreshObjectProperties,
 }) => {
@@ -43,6 +42,7 @@ const Extension = ({
   const [fieldConfig, setFieldConfig] = useState(fields); // ✅ Track enriched field config
   const [dropdownOptions, setDropdownOptions] = useState({});
 
+  // Upon loading load the previous fields and drop down options
   useEffect(() => {
     loadPropertiesFromServerless();
     loadDropdownOptions();
@@ -67,6 +67,7 @@ const Extension = ({
     }
   };
 
+  // Loads the properties from Hubspot
   const loadPropertiesFromServerless = async () => {
     const keys = fieldConfig
       .flatMap((s) => s.fields.map((f) => f.key))
@@ -90,28 +91,6 @@ const Extension = ({
       sendAlert({ message: "Failed to load deal properties", type: "error" });
     }
   };
-  
-
-  // Load values from Hubspot
-  const loadFormValues = async () => {
-    const keys = Array.from(
-      new Set(
-        fieldConfig
-          .flatMap((s) => s.fields.map((f) => f.key))
-          .filter(Boolean)
-      )
-    );
-    console.log("Keys", keys);
-    const result = await fetchCrmObjectProperties({
-      objectTypeId: "0-3", // deals
-      objectId: context?.crm?.objectId,
-      properties: ["amount"],
-    });
-
-    console.log("Results", result);
-
-    setFormValues(result); // flat object: { roof_type: "shingle", ... }
-  };
 
   // Extract all dropdown property keys
   const getDropdownKeys = (config) => {
@@ -121,6 +100,7 @@ const Extension = ({
       .map((field) => field.key);
   };
 
+  // Handle any property changes, maybe change to blur method (currently it prints on every keystroke and is annoying)
   const handleChange = (key, value) => {
     setFormValues((prev) => {
       const updated = { ...prev, [key]: value };
@@ -129,6 +109,7 @@ const Extension = ({
     });
   };
 
+  // Makes sure no value is blank to undfined, then if it has a conditional
   const checkCondition = (condition, formValues) => {
     if (!condition) return true;
 
@@ -154,6 +135,7 @@ const Extension = ({
     );
   };
 
+  // Prepares data to then send to hubspot
   const normalizeValue = (val) => {
     if (val === undefined || val === null) return null;
 
@@ -181,6 +163,7 @@ const Extension = ({
     typeof val.month === "number" &&
     (typeof val.day === "number" || typeof val.date === "number");
 
+    // date converted to "YYYY-MM-DD" format from year, month, day
   const convertDateObject = (val) => {
     try {
       const day = val.day ?? val.date; // support both
@@ -191,6 +174,7 @@ const Extension = ({
     }
   };
 
+  // Filters out read only fields to prevent the API call crashing
   const getWritableKeys = (config) => {
     return config
       .flatMap((section) => section.fields)
@@ -198,6 +182,7 @@ const Extension = ({
       .map((field) => field.key);
   };
 
+  // Saves properties to hubspot
   const handleSave = async () => {
     const writableKeys = getWritableKeys(fieldConfig);
 
