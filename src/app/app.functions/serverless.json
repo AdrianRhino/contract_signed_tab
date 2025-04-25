@@ -11,6 +11,10 @@
     "getDealProperties": {
       "file": "getDealProperties.js",
       "secrets": []
+    },
+    "uploadFile": {
+      "file": "uploadFile.js",
+      "secrets": []
     }
   }
 }

@@ -72,22 +72,25 @@ const Extension = ({
     const keys = fieldConfig
       .flatMap((s) => s.fields.map((f) => f.key))
       .filter(Boolean);
-  
+
     const response = await runServerless({
       name: "getDealProperties",
       parameters: {
         dealId: context?.crm?.objectId,
-        properties: keys
-      }
+        properties: keys,
+      },
     });
 
     console.log("🔍 Full serverless response:", response.response.values);
-  
+
     if (response?.response?.values) {
       console.log("✅ Loaded from serverless:", response.response.values);
       setFormValues(response.response.values);
     } else {
-      console.warn("❌ Failed to load via serverless:", response?.error || "Unknown");
+      console.warn(
+        "❌ Failed to load via serverless:",
+        response?.error || "Unknown"
+      );
       sendAlert({ message: "Failed to load deal properties", type: "error" });
     }
   };
@@ -96,7 +99,7 @@ const Extension = ({
   const getDropdownKeys = (config) => {
     return config
       .flatMap((section) => section.fields)
-      .filter((field) => field.type === "dropdown")
+      .filter((field) => field.type === "dropdown" || "multi-checkbox")
       .map((field) => field.key);
   };
 
@@ -129,12 +132,6 @@ const Extension = ({
     return true; // Default to show if unknown
   };
 
-  const sanitizeFormValues = (values) => {
-    return Object.fromEntries(
-      Object.entries(values).map(([key, val]) => [key, normalizeValue(val)])
-    );
-  };
-
   // Prepares data to then send to hubspot
   const normalizeValue = (val) => {
     if (val === undefined || val === null) return null;
@@ -154,6 +151,11 @@ const Extension = ({
       return val;
     }
 
+    // ✅ If it's a dropdown or multi-select array
+    if (Array.isArray(val)) {
+      return val.join(";"); // HubSpot's expected format
+    }
+
     // Handle all other primitives (strings, numbers)
     return val;
   };
@@ -163,15 +165,51 @@ const Extension = ({
     typeof val.month === "number" &&
     (typeof val.day === "number" || typeof val.date === "number");
 
-    // date converted to "YYYY-MM-DD" format from year, month, day
+  // date converted to "YYYY-MM-DD" format from year, month, day
   const convertDateObject = (val) => {
     try {
       const day = val.day ?? val.date; // support both
       const date = new Date(val.year, val.month - 1, day);
+
+      console.log("To Hubspot Date: ", date.toISOString().split("T")[0])
       return date.toISOString().split("T")[0]; // "YYYY-MM-DD"
     } catch {
       return null;
     }
+  };
+
+  // date convert from "YYYY-MM-DD" to year, month, day for the DateInput Property
+  const convertToDateObject = (str) => {
+    if (!str || typeof str !== "string") return null;
+  
+    const parts = str.split("-");
+    if (parts.length !== 3) return null;
+  
+    const [year, month, day] = parts.map((p) => parseInt(p, 10));
+  
+    if (
+      isNaN(year) ||
+      isNaN(month) ||
+      isNaN(day) ||
+      year < 1900 ||
+      month < 1 ||
+      month > 12 ||
+      day < 1 ||
+      day > 31
+    ) {
+      return null; // 💥 invalid parts
+    }
+  
+    return {
+      year,
+      month,
+      day,
+      formattedDate: new Date(year, month - 1, day).toLocaleDateString("en-US", {
+        month: "long",
+        day: "numeric",
+        year: "numeric",
+      }),
+    };
   };
 
   // Filters out read only fields to prevent the API call crashing
@@ -180,6 +218,35 @@ const Extension = ({
       .flatMap((section) => section.fields)
       .filter((field) => field.type !== "read-only")
       .map((field) => field.key);
+  };
+
+  // Helper file to Base64
+  const fileToBase64 = (file) =>
+    new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result.split(",")[1]);
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+
+  // Handles the file uploading (Files can't be used in extensions currently)
+  const handleFileUpload = async (file, key) => {
+    const base64 = await fileToBase64(file);
+
+    const response = await runServerless({
+      name: "uploadFile",
+      parameters: {
+        fileName: file.name,
+        base64,
+        mimeType: file.type,
+      },
+    });
+
+    const fileUrl = response?.response?.url;
+
+    if (fileUrl) {
+      handleChange(key, fileUrl); // updates form state
+    }
   };
 
   // Saves properties to hubspot
@@ -260,6 +327,7 @@ const Extension = ({
                   <NumberInput
                     label={field.label}
                     placeholder={`Enter ${field.label}`}
+                    value={formValues[field.key] || ""}
                     onChange={(val) => handleChange(field.key, val)}
                   />
                 ) : field.type === "checkbox" ? (
@@ -274,7 +342,7 @@ const Extension = ({
                     label={field.label}
                     name={field.key}
                     onChange={(val) => handleChange(field.key, val)}
-                    value={dateValue}
+                    value={convertToDateObject(formValues[field.key])}
                     format="long"
                   />
                 ) : field.type === "Single-line text" ? (
@@ -286,6 +354,39 @@ const Extension = ({
                   />
                 ) : field.type === "file" ? (
                   <Text>{`${field.label} (file upload placeholder)`}</Text>
+                ) : field.type === "file-url" ? (
+                  <>
+                    <Input
+                      label={field.label}
+                      type="file"
+                      placeholder={`Enter ${field.label}`}
+                      accept=".pdf,.jpg,.png,.docx"
+                      onChange={(e) =>
+                        handleFileUpload(e.target.files[0], field.key)
+                      }
+                    />
+                    {formValues[field.key] && (
+                      <Link href={formValues[field.key]} target="_blank">
+                        View Uploaded File
+                      </Link>
+                    )}
+                  </>
+                ) : field.type === "multi-checkbox" ? (
+                  <MultiSelect
+                    label={field.label}
+                    placeholder={`Enter ${field.label}`}
+                    options={dropdownOptions.job_type || []}
+                    value={
+                      typeof formValues[field.key] === "string"
+                        ? formValues[field.key]
+                          ? formValues[field.key].split(";")
+                          : null
+                        : Array.isArray(formValues[field.key])
+                        ? formValues[field.key]
+                        : null
+                    }
+                    onChange={(val) => handleChange(field.key, val)}
+                  />
                 ) : field.type === "read-only" ? (
                   <Input
                     label={field.label}
@@ -297,9 +398,11 @@ const Extension = ({
                 ) : (
                   <Text>No Type Associated</Text>
                 )}
+                <Text></Text>
               </React.Fragment>
             ))}
             <Divider />
+            <Text></Text>
           </React.Fragment>
         );
       })}

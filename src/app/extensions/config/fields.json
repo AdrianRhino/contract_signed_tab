@@ -11,7 +11,7 @@
       {
         "key": "job_type",
         "label": "Job Type",
-        "type": "checkbox",
+        "type": "multi-checkbox",
         "required": false
       },
       {
@@ -80,8 +80,14 @@
       },
       {
         "key": "financing_documentation",
-        "label": "Finance Documentation (1)",
+        "label": "Finance Documentation (1) (File***)",
         "type": "file",
+        "required": false
+      },
+      {
+        "key": "financing_documentation_url",
+        "label": "Finance Documentation (1) (**URL)",
+        "type": "file-url",
         "required": false
       },
       {
