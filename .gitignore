@@ -104,4 +104,5 @@ dist
 
 hubspot.config.yml
 
-.vite/
+# .gitignore
+.vite
