@@ -321,11 +321,6 @@ const Extension = ({
       <Text>
         <Text>This is Main</Text>
       </Text>
-      <Button
-        onClick={loadPropertiesFromServerless}
-      >
-        Run Load Properties
-      </Button>
       <Button onClick={handleSave}>Save</Button>
     </>
   );
