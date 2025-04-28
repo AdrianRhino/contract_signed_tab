@@ -156,7 +156,7 @@
       {
         "key": "more_financing_needed_2",
         "label": "Is a THIRD round of financing needed?",
-        "type": "checkbox",
+        "type": "button",
         "required": false
       }
     ]

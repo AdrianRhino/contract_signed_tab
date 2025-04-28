@@ -14,6 +14,8 @@ import {
   Checkbox,
   NumberInput,
   MultiSelect,
+  Modal,
+  ModalBody,
 } from "@hubspot/ui-extensions";
 
 import fields from "./config/fields.json";
@@ -41,6 +43,7 @@ const Extension = ({
   const [dateValue, setDateValue] = useState();
   const [fieldConfig, setFieldConfig] = useState(fields); // ✅ Track enriched field config
   const [dropdownOptions, setDropdownOptions] = useState({});
+  const [showModal, setShowModal] = useState(true);
 
   // Upon loading load the previous fields and drop down options
   useEffect(() => {
@@ -171,7 +174,7 @@ const Extension = ({
       const day = val.day ?? val.date; // support both
       const date = new Date(val.year, val.month - 1, day);
 
-      console.log("To Hubspot Date: ", date.toISOString().split("T")[0])
+      console.log("To Hubspot Date: ", date.toISOString().split("T")[0]);
       return date.toISOString().split("T")[0]; // "YYYY-MM-DD"
     } catch {
       return null;
@@ -181,12 +184,12 @@ const Extension = ({
   // date convert from "YYYY-MM-DD" to year, month, day for the DateInput Property
   const convertToDateObject = (str) => {
     if (!str || typeof str !== "string") return null;
-  
+
     const parts = str.split("-");
     if (parts.length !== 3) return null;
-  
+
     const [year, month, day] = parts.map((p) => parseInt(p, 10));
-  
+
     if (
       isNaN(year) ||
       isNaN(month) ||
@@ -199,16 +202,19 @@ const Extension = ({
     ) {
       return null; // 💥 invalid parts
     }
-  
+
     return {
       year,
       month,
       day,
-      formattedDate: new Date(year, month - 1, day).toLocaleDateString("en-US", {
-        month: "long",
-        day: "numeric",
-        year: "numeric",
-      }),
+      formattedDate: new Date(year, month - 1, day).toLocaleDateString(
+        "en-US",
+        {
+          month: "long",
+          day: "numeric",
+          year: "numeric",
+        }
+      ),
     };
   };
 
@@ -395,6 +401,31 @@ const Extension = ({
                     value={formValues[field.key] || ""}
                     onInput={(val) => handleChange(field.key, val)}
                   />
+                ) : field.key === "more_financing_needed_2" ? (
+                  <Button // Swap to checkbox if needed
+                    overlay={
+                      <Modal
+                        id="default-modal"
+                        title="Example modal"
+                        width="md"
+                      >
+                        <ModalBody>
+                          <Text>
+                            Welcome to my modal. Thanks for stopping by!
+                          </Text>
+                          <TextArea 
+                          label={field.label}
+                          name={field.key}
+                          value={formValues[field.key] || ""}
+                          placeholder={`Enter ${field.label}`}
+                          onInput={(val) => handleChange(field.key, val)}
+                          />
+                        </ModalBody>
+                      </Modal>
+                    }
+                  >
+                    {field.label}
+                  </Button>
                 ) : (
                   <Text>No Type Associated</Text>
                 )}
