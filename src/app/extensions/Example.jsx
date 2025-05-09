@@ -5,9 +5,7 @@ import {
   Button,
   Text,
   Input,
-  Flex,
   hubspot,
-  Heading,
   TextArea,
   Select,
   DateInput,
@@ -40,10 +38,8 @@ const Extension = ({
   refreshObjectProperties,
 }) => {
   const [formValues, setFormValues] = useState({});
-  const [dateValue, setDateValue] = useState();
   const [fieldConfig, setFieldConfig] = useState(fields); // ✅ Track enriched field config
   const [dropdownOptions, setDropdownOptions] = useState({});
-  const [showModal, setShowModal] = useState(true);
 
   // Upon loading load the previous fields and drop down options
   useEffect(() => {
@@ -172,7 +168,7 @@ const Extension = ({
   const convertDateObject = (val) => {
     try {
       const day = val.day ?? val.date; // support both
-      const date = new Date(val.year, val.month - 1, day);
+      const date = new Date(val.year, val.month, day);
 
       console.log("To Hubspot Date: ", date.toISOString().split("T")[0]);
       return date.toISOString().split("T")[0]; // "YYYY-MM-DD"
@@ -181,42 +177,26 @@ const Extension = ({
     }
   };
 
-  // date convert from "YYYY-MM-DD" to year, month, day for the DateInput Property
   const convertToDateObject = (str) => {
-    if (!str || typeof str !== "string") return null;
-
-    const parts = str.split("-");
-    if (parts.length !== 3) return null;
-
-    const [year, month, day] = parts.map((p) => parseInt(p, 10));
-
-    if (
-      isNaN(year) ||
-      isNaN(month) ||
-      isNaN(day) ||
-      year < 1900 ||
-      month < 1 ||
-      month > 12 ||
-      day < 1 ||
-      day > 31
-    ) {
-      return null; // 💥 invalid parts
-    }
-
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(str)) return null;
+  
+    const [year, month, day] = str.split("-").map(Number);
+  
     return {
       year,
-      month,
-      day,
-      formattedDate: new Date(year, month - 1, day).toLocaleDateString(
-        "en-US",
-        {
-          month: "long",
-          day: "numeric",
-          year: "numeric",
-        }
-      ),
+      month: month -1, // HubSpot expects 0-based months
+      date: day,        // Must be called `date` not `day`
     };
   };
+
+  const getDateInputValue = (val) => {
+    if (!val) return null;
+    if (typeof val === "string") return convertToDateObject(val);
+    if (typeof val === "object" && val.year && val.month >= 0 && val.date)
+      return val;
+    return null;
+  };
+  
 
   // Filters out read only fields to prevent the API call crashing
   const getWritableKeys = (config) => {
@@ -264,6 +244,9 @@ const Extension = ({
         .filter(([key]) => writableKeys.includes(key) && key !== "hs_object_id")
         .map(([key, val]) => [key, normalizeValue(val)])
     );
+
+    console.log("🧼Pre-Cleaned values to save:", cleanValues);
+
     const safeCleanValues = JSON.parse(JSON.stringify(cleanValues)); // removes undefineds, etc.
 
     console.log("🧼 Cleaned values to save:", safeCleanValues);
@@ -340,6 +323,7 @@ const Extension = ({
                   <Checkbox
                     name={field.key}
                     onChange={(val) => handleChange(field.key, val)}
+                    checked={formValues[field.key] === true || formValues[field.key] === "true"}
                   >
                     {field.label}
                   </Checkbox>
@@ -348,7 +332,7 @@ const Extension = ({
                     label={field.label}
                     name={field.key}
                     onChange={(val) => handleChange(field.key, val)}
-                    value={convertToDateObject(formValues[field.key])}
+                    value={getDateInputValue(formValues[field.key])}
                     format="long"
                   />
                 ) : field.type === "Single-line text" ? (
@@ -367,6 +351,7 @@ const Extension = ({
                       type="file"
                       placeholder={`Enter ${field.label}`}
                       accept=".pdf,.jpg,.png,.docx"
+                      disabled={true}
                       onChange={(e) =>
                         handleFileUpload(e.target.files[0], field.key)
                       }
@@ -440,7 +425,11 @@ const Extension = ({
       <Text>
         <Text>This is Main</Text>
       </Text>
-      <Button onClick={handleSave}>Save</Button>
+      <Button variant="primary" onClick={handleSave}>Save</Button>
+      <Button onClick={() => {
+       console.log('Test')
+        
+      }}>Test Checkboxes</Button>
     </>
   );
 };
