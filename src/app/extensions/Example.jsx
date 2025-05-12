@@ -47,6 +47,10 @@ const Extension = ({
     loadDropdownOptions();
   }, []);
 
+  useEffect(() => {
+    console.log("This is the Finance: ", formValues["more_financing_needed"])
+  }, [formValues["more_financing_needed"]])
+
   // Load the dropdown options
   const loadDropdownOptions = async () => {
     const dropdownKeys = getDropdownKeys(fieldConfig);
@@ -184,7 +188,7 @@ const Extension = ({
   
     return {
       year,
-      month: month -1, // HubSpot expects 0-based months
+      month: month - 1, // HubSpot expects 0-based months
       date: day,        // Must be called `date` not `day`
     };
   };
@@ -323,7 +327,7 @@ const Extension = ({
                   <Checkbox
                     name={field.key}
                     onChange={(val) => handleChange(field.key, val)}
-                    checked={formValues[field.key] === true || formValues[field.key] === "true"}
+                    checked={!!(formValues[field.key] === true || formValues[field.key] === "true" || formValues[field.key] === "on" || formValues[field.key] === 1)}
                   >
                     {field.label}
                   </Checkbox>
@@ -387,16 +391,16 @@ const Extension = ({
                     onInput={(val) => handleChange(field.key, val)}
                   />
                 ) : field.key === "more_financing_needed_2" ? (
-                  <Button // Swap to checkbox if needed
+                  <Button 
                     overlay={
                       <Modal
-                        id="default-modal"
-                        title="Example modal"
+                        id="third-round-needed"
+                        title="3rd Round Financing Needed"
                         width="md"
                       >
                         <ModalBody>
                           <Text>
-                            Welcome to my modal. Thanks for stopping by!
+                            Please fill in the reason that a Third Round of Financing is needed.
                           </Text>
                           <TextArea 
                           label={field.label}
@@ -422,14 +426,8 @@ const Extension = ({
           </React.Fragment>
         );
       })}
-      <Text>
-        <Text>This is Main</Text>
-      </Text>
+      <Text></Text>
       <Button variant="primary" onClick={handleSave}>Save</Button>
-      <Button onClick={() => {
-       console.log('Test')
-        
-      }}>Test Checkboxes</Button>
     </>
   );
 };
