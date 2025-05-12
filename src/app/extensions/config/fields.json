@@ -156,8 +156,13 @@
       {
         "key": "more_financing_needed_2",
         "label": "Is a THIRD round of financing needed?",
-        "type": "button",
-        "required": false
+        "type": "action-button",
+        "required": false,
+        "modal": {
+          "key": "third_round_financing_notes",
+          "type": "Multi-line text",
+          "label": "Third Round Financing Notes"
+        }
       }
     ]
   },

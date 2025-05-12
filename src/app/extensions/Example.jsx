@@ -26,6 +26,7 @@ hubspot.extend(({ context, runServerlessFunction, actions }) => (
     sendAlert={actions.addAlert}
     fetchCrmObjectProperties={actions.fetchCrmObjectProperties}
     refreshObjectProperties={actions.refreshObjectProperties}
+    close={actions.closeOverlay}
   />
 ));
 
@@ -34,8 +35,8 @@ const Extension = ({
   context,
   runServerless,
   sendAlert,
-  fetchCrmObjectProperties,
   refreshObjectProperties,
+  close,
 }) => {
   const [formValues, setFormValues] = useState({});
   const [fieldConfig, setFieldConfig] = useState(fields); // ✅ Track enriched field config
@@ -206,7 +207,7 @@ const Extension = ({
   const getWritableKeys = (config) => {
     return config
       .flatMap((section) => section.fields)
-      .filter((field) => field.type !== "read-only")
+      .filter((field) => field.type !== "action-button" && field.type !== "read-only")
       .map((field) => field.key);
   };
 
@@ -240,11 +241,16 @@ const Extension = ({
   };
 
   // Saves properties to hubspot
-  const handleSave = async () => {
+  const handleSave = async (
+    overrides = {}
+  ) => {
     const writableKeys = getWritableKeys(fieldConfig);
 
     const cleanValues = Object.fromEntries(
-      Object.entries(formValues)
+      Object.entries({
+        ...formValues,
+        ...overrides,
+      })
         .filter(([key]) => writableKeys.includes(key) && key !== "hs_object_id")
         .map(([key, val]) => [key, normalizeValue(val)])
     );
@@ -259,7 +265,9 @@ const Extension = ({
       name: "saveDealProperties",
       parameters: {
         dealId: context?.crm?.objectId,
-        updates: safeCleanValues,
+        updates: {
+          ...safeCleanValues,
+        },
       },
     });
 
@@ -390,7 +398,7 @@ const Extension = ({
                     value={formValues[field.key] || ""}
                     onInput={(val) => handleChange(field.key, val)}
                   />
-                ) : field.key === "more_financing_needed_2" ? (
+                ) : field.type === "action-button" ? (
                   <Button 
                     overlay={
                       <Modal
@@ -404,11 +412,24 @@ const Extension = ({
                           </Text>
                           <TextArea 
                           label={field.label}
-                          name={field.key}
-                          value={formValues[field.key] || ""}
+                          name={field.modal.key}
+                          value={formValues[field.modal.key] || ""}
                           placeholder={`Enter ${field.label}`}
                           onInput={(val) => handleChange(field.key, val)}
                           />
+                          <Text></Text>
+                          <Button variant="primary" onClick={() => {
+                            handleSave(
+                              { [field.modal.key]: formValues[field.modal.key] }
+                            )
+                            console.log('Third Financing: ' + formValues[field.modal.key])
+                            refreshObjectProperties();
+                            close("third-round-needed");
+                            }}>Save</Button>
+                            <Button 
+                            variant="secondary" 
+                            onClick={() => close("third-round-needed")}
+                            >Cancel</Button>
                         </ModalBody>
                       </Modal>
                     }
