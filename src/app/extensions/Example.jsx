@@ -49,8 +49,9 @@ const Extension = ({
   }, []);
 
   useEffect(() => {
-    console.log("This is the Finance: ", formValues["more_financing_needed"])
-  }, [formValues["more_financing_needed"]])
+    console.log("This is the Finance: ", formValues["more_financing_needed"]);
+  }, [formValues["more_financing_needed"]]);
+  
 
   // Load the dropdown options
   const loadDropdownOptions = async () => {
@@ -74,7 +75,14 @@ const Extension = ({
   // Loads the properties from Hubspot
   const loadPropertiesFromServerless = async () => {
     const keys = fieldConfig
-      .flatMap((s) => s.fields.map((f) => f.key))
+      .flatMap((section) =>
+        section.fields.flatMap((field) => {
+          const keys = [];
+          if (field.key) keys.push(field.key); // main field key
+          if (field.modal?.key) keys.push(field.modal.key); // nested modal key
+          return keys;
+        })
+      )
       .filter(Boolean);
 
     const response = await runServerless({
@@ -184,13 +192,13 @@ const Extension = ({
 
   const convertToDateObject = (str) => {
     if (!/^\d{4}-\d{2}-\d{2}$/.test(str)) return null;
-  
+
     const [year, month, day] = str.split("-").map(Number);
-  
+
     return {
       year,
       month: month - 1, // HubSpot expects 0-based months
-      date: day,        // Must be called `date` not `day`
+      date: day, // Must be called `date` not `day`
     };
   };
 
@@ -201,14 +209,20 @@ const Extension = ({
       return val;
     return null;
   };
-  
 
   // Filters out read only fields to prevent the API call crashing
   const getWritableKeys = (config) => {
-    return config
-      .flatMap((section) => section.fields)
-      .filter((field) => field.type !== "action-button" && field.type !== "read-only")
-      .map((field) => field.key);
+    return config.flatMap((section) =>
+      section.fields.flatMap((field) => {
+        if (field.type === "read-only" || field.type === "action-button") {
+          // Skip writing for the button field
+          // BUT if it has a modal key, we want that key to be writable
+          return field.modal?.key ? [field.modal.key] : [];
+        }
+        // Normal writable field
+        return field.key;
+      })
+    );
   };
 
   // Helper file to Base64
@@ -241,17 +255,25 @@ const Extension = ({
   };
 
   // Saves properties to hubspot
-  const handleSave = async (
-    overrides = {}
-  ) => {
+  const handleSave = async (overrides = {}) => {
     const writableKeys = getWritableKeys(fieldConfig);
+    if (overrides) {
+      console.log("These are the overrides: ", overrides);
+    }
 
     const cleanValues = Object.fromEntries(
       Object.entries({
         ...formValues,
         ...overrides,
       })
-        .filter(([key]) => writableKeys.includes(key) && key !== "hs_object_id")
+        .filter(
+          ([key]) =>
+            writableKeys.includes(key) &&
+            key !== "hs_object_id" &&
+            // Always include keys from overrides
+            (Object.keys(overrides).includes(key) ||
+              key !== "third_round_financing_notes")
+        )
         .map(([key, val]) => [key, normalizeValue(val)])
     );
 
@@ -294,9 +316,12 @@ const Extension = ({
     sendAlert({ message: "✅ Saved successfully", type: "success" });
   };
 
+  // 🟢 Re-calculate which sections should show based on formValues
+const visibleFieldConfig = fieldConfig.filter(section => checkCondition(section.condition, formValues));
+
   return (
     <>
-      {fieldConfig.map((section, i) => {
+      {visibleFieldConfig.map((section, i) => {
         const shouldShow = checkCondition(section.condition, formValues);
         if (!shouldShow) return null;
 
@@ -335,7 +360,14 @@ const Extension = ({
                   <Checkbox
                     name={field.key}
                     onChange={(val) => handleChange(field.key, val)}
-                    checked={!!(formValues[field.key] === true || formValues[field.key] === "true" || formValues[field.key] === "on" || formValues[field.key] === 1)}
+                    checked={
+                      !!(
+                        formValues[field.key] === true ||
+                        formValues[field.key] === "true" ||
+                        formValues[field.key] === "on" ||
+                        formValues[field.key] === 1
+                      )
+                    }
                   >
                     {field.label}
                   </Checkbox>
@@ -399,7 +431,7 @@ const Extension = ({
                     onInput={(val) => handleChange(field.key, val)}
                   />
                 ) : field.type === "action-button" ? (
-                  <Button 
+                  <Button
                     overlay={
                       <Modal
                         id="third-round-needed"
@@ -408,28 +440,41 @@ const Extension = ({
                       >
                         <ModalBody>
                           <Text>
-                            Please fill in the reason that a Third Round of Financing is needed.
+                            Please fill in the reason that a Third Round of
+                            Financing is needed.
                           </Text>
-                          <TextArea 
-                          label={field.label}
-                          name={field.modal.key}
-                          value={formValues[field.modal.key] || ""}
-                          placeholder={`Enter ${field.label}`}
-                          onInput={(val) => handleChange(field.key, val)}
+                          <TextArea
+                            label={field.label}
+                            name={field.modal.key}
+                            value={formValues[field.modal.key] || ""}
+                            placeholder={`Enter ${field.label}`}
+                            onInput={(val) =>
+                              handleChange(field.modal.key, val)
+                            }
                           />
                           <Text></Text>
-                          <Button variant="primary" onClick={() => {
-                            handleSave(
-                              { [field.modal.key]: formValues[field.modal.key] }
-                            )
-                            console.log('Third Financing: ' + formValues[field.modal.key])
-                            refreshObjectProperties();
-                            close("third-round-needed");
-                            }}>Save</Button>
-                            <Button 
-                            variant="secondary" 
+                          <Button
+                            variant="primary"
+                            onClick={() => {
+                              handleSave({
+                                [field.modal.key]: formValues[field.modal.key],
+                              });
+                              console.log(
+                                "Third Financing: " +
+                                  formValues[field.modal.key]
+                              );
+                              refreshObjectProperties();
+                              close("third-round-needed");
+                            }}
+                          >
+                            Save
+                          </Button>
+                          <Button
+                            variant="secondary"
                             onClick={() => close("third-round-needed")}
-                            >Cancel</Button>
+                          >
+                            Cancel
+                          </Button>
                         </ModalBody>
                       </Modal>
                     }
@@ -448,7 +493,16 @@ const Extension = ({
         );
       })}
       <Text></Text>
-      <Button variant="primary" onClick={handleSave}>Save</Button>
+      <Button variant="primary" onClick={handleSave}>
+        Save
+      </Button>
+      <Button
+        onClick={() =>
+          console.log("Thrid thing: ", formValues[third_round_financing_notes])
+        }
+      >
+        Print Log
+      </Button>
     </>
   );
 };
