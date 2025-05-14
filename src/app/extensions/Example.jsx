@@ -41,6 +41,7 @@ const Extension = ({
   const [formValues, setFormValues] = useState({});
   const [fieldConfig, setFieldConfig] = useState(fields); // ✅ Track enriched field config
   const [dropdownOptions, setDropdownOptions] = useState({});
+  const [showMoreFinancingOptions, setShowMoreFinancingOptions] = useState(); // delete
 
   // Upon loading load the previous fields and drop down options
   useEffect(() => {
@@ -48,10 +49,12 @@ const Extension = ({
     loadDropdownOptions();
   }, []);
 
-  useEffect(() => {
-    console.log("This is the Finance: ", formValues["more_financing_needed"]);
-  }, [formValues["more_financing_needed"]]);
+  const normalizeCheckbox = (value) =>
+    value === true || value === "true";
   
+  useEffect(() => {
+    setShowMoreFinancingOptions(normalizeCheckbox(formValues["more_financing_needed"]));
+  }, [formValues["more_financing_needed"]]);
 
   // Load the dropdown options
   const loadDropdownOptions = async () => {
@@ -122,26 +125,6 @@ const Extension = ({
       console.log("Updated form values:", updated);
       return updated;
     });
-  };
-
-  // Makes sure no value is blank to undfined, then if it has a conditional
-  const checkCondition = (condition, formValues) => {
-    if (!condition) return true;
-
-    const value = formValues[condition.key];
-
-    if (value === undefined || value === null || value === "") {
-      return condition.includeUnset || false;
-    }
-
-    if ("equals" in condition) return value === condition.equals;
-    if ("notEquals" in condition) return value !== condition.notEquals || null;
-    if ("greaterThan" in condition)
-      return Number(value) > condition.greaterThan;
-    if ("lessThan" in condition) return Number(value) < condition.lessThan;
-    if ("in" in condition) return condition.in.includes(value);
-
-    return true; // Default to show if unknown
   };
 
   // Prepares data to then send to hubspot
@@ -225,35 +208,6 @@ const Extension = ({
     );
   };
 
-  // Helper file to Base64
-  const fileToBase64 = (file) =>
-    new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => resolve(reader.result.split(",")[1]);
-      reader.onerror = reject;
-      reader.readAsDataURL(file);
-    });
-
-  // Handles the file uploading (Files can't be used in extensions currently)
-  const handleFileUpload = async (file, key) => {
-    const base64 = await fileToBase64(file);
-
-    const response = await runServerless({
-      name: "uploadFile",
-      parameters: {
-        fileName: file.name,
-        base64,
-        mimeType: file.type,
-      },
-    });
-
-    const fileUrl = response?.response?.url;
-
-    if (fileUrl) {
-      handleChange(key, fileUrl); // updates form state
-    }
-  };
-
   // Saves properties to hubspot
   const handleSave = async (overrides = {}) => {
     const writableKeys = getWritableKeys(fieldConfig);
@@ -316,14 +270,214 @@ const Extension = ({
     sendAlert({ message: "✅ Saved successfully", type: "success" });
   };
 
-  // 🟢 Re-calculate which sections should show based on formValues
-const visibleFieldConfig = fieldConfig.filter(section => checkCondition(section.condition, formValues));
+  const renderField = (field) => {
+    const value = formValues[field.key] || "";
+
+    switch (field.type) {
+      case "Multi-line text":
+        return (
+          <TextArea
+            label={field.label}
+            name={field.key}
+            value={value}
+            placeholder={`Enter ${field.label}`}
+            onInput={(val) => handleChange(field.key, val)}
+          />
+        );
+
+      case "dropdown":
+        return (
+          <Select
+            label={field.label}
+            name={field.key}
+            options={dropdownOptions[field.key] || []}
+            value={value}
+            placeholder={`Choose ${field.label}`}
+            onChange={(val) => handleChange(field.key, val)}
+          />
+        );
+
+      case "number":
+        return (
+          <NumberInput
+            label={field.label}
+            placeholder={`Enter ${field.label}`}
+            value={value}
+            onChange={(val) => handleChange(field.key, val)}
+          />
+        );
+
+      case "checkbox":
+        return (
+          <Checkbox
+            name={field.key}
+            onChange={(val) => handleChange(field.key, val)}
+            checked={
+              !!(
+                value === true ||
+                value === "true" ||
+                value === "on" ||
+                value === 1
+              )
+            }
+          >
+            {field.label}
+          </Checkbox>
+        );
+
+      case "Single-line text":
+        return (
+          <Input
+            label={field.label}
+            placeholder={`Enter ${field.label}`}
+            value={value}
+            onInput={(val) => handleChange(field.key, val)}
+          />
+        );
+
+      // Add other cases like date, multi-select, file, etc.
+      case "date":
+        return (
+          <DateInput // https://rhinoroofers674.sharepoint.com/:w:/s/Operations/EWo953VxkHtLgwUcNPg2TGcB6jOSXhDKfFxV80mEMxtYiw?e=JpfLbL
+            label={field.label}
+            name={field.key}
+            onChange={(val) => handleChange(field.key, val)}
+            value={getDateInputValue(formValues[field.key])}
+            format="long"
+          />
+        );
+
+      case "file":
+        return <Text>{`${field.label} (file upload placeholder)`}</Text>;
+
+      case "file-url":
+        return (
+          <>
+            <Input
+              label={field.label}
+              type="file"
+              placeholder={`Enter ${field.label}`}
+              accept=".pdf,.jpg,.png,.docx"
+              disabled={true}
+              onChange={(e) => handleFileUpload(e.target.files[0], field.key)}
+            />
+            {formValues[field.key] && (
+              <Link href={value} target="_blank">
+                View Uploaded File
+              </Link>
+            )}
+          </>
+        );
+
+      case "multi-checkbox":
+        return (
+          <MultiSelect
+            label={field.label}
+            placeholder={`Enter ${field.label}`}
+            options={dropdownOptions.job_type || []}
+            value={
+              typeof value === "string"
+                ? value
+                  ? value.split(";")
+                  : null
+                : Array.isArray(value)
+                ? value
+                : null
+            }
+            onChange={(val) => handleChange(field.key, val)}
+          />
+        );
+
+      case "read-only":
+        return (
+          <Input
+            label={field.label}
+            placeholder={`Enter ${field.label}`}
+            readOnly={true}
+            value={value || ""}
+            onInput={(val) => handleChange(field.key, val)}
+          />
+        );
+
+      case "action-button":
+        return (
+          <>
+            <Text></Text>
+            <Button
+              overlay={
+                <Modal
+                  id="third-round-needed"
+                  title="3rd Round Financing Needed"
+                  width="md"
+                >
+                  <ModalBody>
+                    <Text>
+                      Please fill in the reason that a Third Round of Financing
+                      is needed.
+                    </Text>
+                    <TextArea
+                      label={field.label}
+                      name={field.modal.key}
+                      value={formValues[field.modal.key] || ""}
+                      placeholder={`Enter ${field.label}`}
+                      onInput={(val) => handleChange(field.modal.key, val)}
+                    />
+                    <Text></Text>
+                    <Button
+                      variant="primary"
+                      onClick={() => {
+                        handleSave({
+                          [field.modal.key]: formValues[field.modal.key],
+                        });
+                        console.log(
+                          "Third Financing: " + formValues[field.modal.key]
+                        );
+                        refreshObjectProperties();
+                        close("third-round-needed");
+                      }}
+                    >
+                      Save
+                    </Button>
+                    <Button
+                      variant="secondary"
+                      onClick={() => close("third-round-needed")}
+                    >
+                      Cancel
+                    </Button>
+                  </ModalBody>
+                </Modal>
+              }
+            >
+              {field.label}
+            </Button>
+          </>
+        );
+
+      default:
+        return <Text>{`No renderer for type: ${field.type}`}</Text>;
+    }
+  };
 
   return (
     <>
-      {visibleFieldConfig.map((section, i) => {
-        const shouldShow = checkCondition(section.condition, formValues);
-        if (!shouldShow) return null;
+      {fieldConfig.map((section, i) => {
+        if (section.section === "Financing - Round 2" && showMoreFinancingOptions) {
+            return (
+              <React.Fragment key={`section-${i}`}>
+                <Text format={{ fontWeight: "bold", fontSize: "lg" }}>
+                  {section.section}
+                </Text>
+                {section.fields.map((field, j) => (
+                  <React.Fragment key={`field-${field.key}-${j}`}>
+                    {renderField(field)}
+                  </React.Fragment>
+                ))}
+                <Divider />
+              </React.Fragment>
+            );
+          } else if (section.section === "Financing - Round 2") {
+            return null;
+          }
 
         return (
           <React.Fragment key={`section-${i}`}>
@@ -332,159 +486,7 @@ const visibleFieldConfig = fieldConfig.filter(section => checkCondition(section.
             </Text>
             {section.fields.map((field, j) => (
               <React.Fragment key={`field-${field.key}-${j}`}>
-                {field.type === "Multi-line text" ? (
-                  <TextArea
-                    label={field.label}
-                    name={field.key}
-                    value={formValues[field.key] || ""}
-                    placeholder={`Enter ${field.label}`}
-                    onInput={(val) => handleChange(field.key, val)}
-                  />
-                ) : field.type === "dropdown" ? (
-                  <Select
-                    label={field.label}
-                    name={field.key}
-                    options={dropdownOptions[field.key] || []}
-                    value={formValues[field.key]}
-                    placeholder={`Choose ${field.label}`}
-                    onChange={(val) => handleChange(field.key, val)}
-                  />
-                ) : field.type === "number" ? (
-                  <NumberInput
-                    label={field.label}
-                    placeholder={`Enter ${field.label}`}
-                    value={formValues[field.key] || ""}
-                    onChange={(val) => handleChange(field.key, val)}
-                  />
-                ) : field.type === "checkbox" ? (
-                  <Checkbox
-                    name={field.key}
-                    onChange={(val) => handleChange(field.key, val)}
-                    checked={
-                      !!(
-                        formValues[field.key] === true ||
-                        formValues[field.key] === "true" ||
-                        formValues[field.key] === "on" ||
-                        formValues[field.key] === 1
-                      )
-                    }
-                  >
-                    {field.label}
-                  </Checkbox>
-                ) : field.type === "date" ? (
-                  <DateInput // https://rhinoroofers674.sharepoint.com/:w:/s/Operations/EWo953VxkHtLgwUcNPg2TGcB6jOSXhDKfFxV80mEMxtYiw?e=JpfLbL
-                    label={field.label}
-                    name={field.key}
-                    onChange={(val) => handleChange(field.key, val)}
-                    value={getDateInputValue(formValues[field.key])}
-                    format="long"
-                  />
-                ) : field.type === "Single-line text" ? (
-                  <Input
-                    label={field.label}
-                    placeholder={`Enter ${field.label}`}
-                    value={formValues[field.key] || ""}
-                    onInput={(val) => handleChange(field.key, val)}
-                  />
-                ) : field.type === "file" ? (
-                  <Text>{`${field.label} (file upload placeholder)`}</Text>
-                ) : field.type === "file-url" ? (
-                  <>
-                    <Input
-                      label={field.label}
-                      type="file"
-                      placeholder={`Enter ${field.label}`}
-                      accept=".pdf,.jpg,.png,.docx"
-                      disabled={true}
-                      onChange={(e) =>
-                        handleFileUpload(e.target.files[0], field.key)
-                      }
-                    />
-                    {formValues[field.key] && (
-                      <Link href={formValues[field.key]} target="_blank">
-                        View Uploaded File
-                      </Link>
-                    )}
-                  </>
-                ) : field.type === "multi-checkbox" ? (
-                  <MultiSelect
-                    label={field.label}
-                    placeholder={`Enter ${field.label}`}
-                    options={dropdownOptions.job_type || []}
-                    value={
-                      typeof formValues[field.key] === "string"
-                        ? formValues[field.key]
-                          ? formValues[field.key].split(";")
-                          : null
-                        : Array.isArray(formValues[field.key])
-                        ? formValues[field.key]
-                        : null
-                    }
-                    onChange={(val) => handleChange(field.key, val)}
-                  />
-                ) : field.type === "read-only" ? (
-                  <Input
-                    label={field.label}
-                    placeholder={`Enter ${field.label}`}
-                    readOnly={true}
-                    value={formValues[field.key] || ""}
-                    onInput={(val) => handleChange(field.key, val)}
-                  />
-                ) : field.type === "action-button" ? (
-                  <Button
-                    overlay={
-                      <Modal
-                        id="third-round-needed"
-                        title="3rd Round Financing Needed"
-                        width="md"
-                      >
-                        <ModalBody>
-                          <Text>
-                            Please fill in the reason that a Third Round of
-                            Financing is needed.
-                          </Text>
-                          <TextArea
-                            label={field.label}
-                            name={field.modal.key}
-                            value={formValues[field.modal.key] || ""}
-                            placeholder={`Enter ${field.label}`}
-                            onInput={(val) =>
-                              handleChange(field.modal.key, val)
-                            }
-                          />
-                          <Text></Text>
-                          <Button
-                            variant="primary"
-                            onClick={() => {
-                              handleSave({
-                                [field.modal.key]: formValues[field.modal.key],
-                              });
-                              console.log(
-                                "Third Financing: " +
-                                  formValues[field.modal.key]
-                              );
-                              refreshObjectProperties();
-                              close("third-round-needed");
-                            }}
-                          >
-                            Save
-                          </Button>
-                          <Button
-                            variant="secondary"
-                            onClick={() => close("third-round-needed")}
-                          >
-                            Cancel
-                          </Button>
-                        </ModalBody>
-                      </Modal>
-                    }
-                  >
-                    {field.label}
-                  </Button>
-                ) : (
-                  <Text>No Type Associated</Text>
-                )}
-                <Text></Text>
+                {renderField(field)}
               </React.Fragment>
             ))}
             <Divider />
@@ -495,13 +497,6 @@ const visibleFieldConfig = fieldConfig.filter(section => checkCondition(section.
       <Text></Text>
       <Button variant="primary" onClick={handleSave}>
         Save
-      </Button>
-      <Button
-        onClick={() =>
-          console.log("Thrid thing: ", formValues[third_round_financing_notes])
-        }
-      >
-        Print Log
       </Button>
     </>
   );
