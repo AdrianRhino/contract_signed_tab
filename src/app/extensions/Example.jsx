@@ -39,9 +39,9 @@ const Extension = ({
   close,
 }) => {
   const [formValues, setFormValues] = useState({});
-  const [fieldConfig, setFieldConfig] = useState(fields); // ✅ Track enriched field config
+  const [fieldConfig, setFieldConfig] = useState(fields);
   const [dropdownOptions, setDropdownOptions] = useState({});
-  const [showMoreFinancingOptions, setShowMoreFinancingOptions] = useState(); // delete
+  const [showMoreFinancingOptions, setShowMoreFinancingOptions] = useState();
 
   // Upon loading load the previous fields and drop down options
   useEffect(() => {
@@ -68,8 +68,6 @@ const Extension = ({
         properties: dropdownKeys,
       },
     });
-    console.log("Dropdown Keys:", dropdownKeys);
-    console.log("Response:", response);
     if (response.response?.optionsByProperty) {
       setDropdownOptions(response.response.optionsByProperty);
     }
@@ -96,7 +94,6 @@ const Extension = ({
       },
     });
 
-    console.log("🔍 Full serverless response:", response.response.values);
 
     if (response?.response?.values) {
       console.log("✅ Loaded from serverless:", response.response.values);
@@ -231,8 +228,6 @@ const Extension = ({
         .map(([key, val]) => [key, normalizeValue(val)])
     );
 
-    console.log("🧼Pre-Cleaned values to save:", cleanValues);
-
     const safeCleanValues = JSON.parse(JSON.stringify(cleanValues)); // removes undefineds, etc.
 
     console.log("🧼 Cleaned values to save:", safeCleanValues);
@@ -334,8 +329,6 @@ const Extension = ({
             onInput={(val) => handleChange(field.key, val)}
           />
         );
-
-      // Add other cases like date, multi-select, file, etc.
       case "date":
         return (
           <DateInput // https://rhinoroofers674.sharepoint.com/:w:/s/Operations/EWo953VxkHtLgwUcNPg2TGcB6jOSXhDKfFxV80mEMxtYiw?e=JpfLbL
