@@ -41,7 +41,9 @@ const Extension = ({
   const [formValues, setFormValues] = useState({});
   const [fieldConfig, setFieldConfig] = useState(fields);
   const [dropdownOptions, setDropdownOptions] = useState({});
-  const [showMoreFinancingOptions, setShowMoreFinancingOptions] = useState();
+  const [showRoundOne, setShowRoundOne] = useState();
+  const [showRoundTwo, setShowRoundTwo] = useState();
+  const [pipeline, setPipeline] = useState();
 
   // Upon loading load the previous fields and drop down options
   useEffect(() => {
@@ -53,8 +55,9 @@ const Extension = ({
     value === true || value === "true";
   
   useEffect(() => {
-    setShowMoreFinancingOptions(normalizeCheckbox(formValues["more_financing_needed"]));
-  }, [formValues["more_financing_needed"]]);
+    setShowRoundOne(formValues["financed"]);
+    setShowRoundTwo(normalizeCheckbox(formValues["more_financing_needed"]));
+  }, [formValues["more_financing_needed"], formValues["financed"]]);
 
   // Load the dropdown options
   const loadDropdownOptions = async () => {
@@ -454,23 +457,21 @@ const Extension = ({
   return (
     <>
       {fieldConfig.map((section, i) => {
-        if (section.section === "Financing - Round 2" && showMoreFinancingOptions) {
-            return (
-              <React.Fragment key={`section-${i}`}>
-                <Text format={{ fontWeight: "bold", fontSize: "lg" }}>
-                  {section.section}
-                </Text>
-                {section.fields.map((field, j) => (
-                  <React.Fragment key={`field-${field.key}-${j}`}>
-                    {renderField(field)}
-                  </React.Fragment>
-                ))}
-                <Divider />
-              </React.Fragment>
-            );
-          } else if (section.section === "Financing - Round 2") {
-            return null;
-          }
+        if (section.section === "Insurance Payment Terms" && formValues["pipeline"] !== "21960027") {
+          return null;  // ❌ don't show if not Insurance pipeline
+        }
+      
+        if (section.section === "Retail Payment Terms" && formValues["pipeline"] !== "22071991") {
+          return null;  // ❌ don't show if not Retail pipeline
+        }
+      
+        if (section.section === "Financing - Round 1" && showRoundOne === "Not Financed") {
+          return null;  // ❌ don't show Round 1 if Not Financed
+        }
+      
+        if (section.section === "Financing - Round 2" && !showRoundTwo) {
+          return null;  // ❌ don't show Round 2 if no more financing needed
+        }
 
         return (
           <React.Fragment key={`section-${i}`}>
@@ -488,7 +489,7 @@ const Extension = ({
         );
       })}
       <Text></Text>
-      <Button variant="primary" onClick={handleSave}>
+      <Button variant="primary" onClick={() => handleSave()}>
         Save
       </Button>
     </>
