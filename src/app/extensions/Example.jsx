@@ -44,6 +44,7 @@ const Extension = ({
   const [showRoundOne, setShowRoundOne] = useState();
   const [showRoundTwo, setShowRoundTwo] = useState();
   const [pipeline, setPipeline] = useState();
+  const [dealstage, setDealstage] = useState();
 
   // Upon loading load the previous fields and drop down options
   useEffect(() => {
@@ -51,13 +52,53 @@ const Extension = ({
     loadDropdownOptions();
   }, []);
 
-  const normalizeCheckbox = (value) =>
-    value === true || value === "true";
-  
+  const normalizeCheckbox = (value) => value === true || value === "true";
+
   useEffect(() => {
     setShowRoundOne(formValues["financed"]);
     setShowRoundTwo(normalizeCheckbox(formValues["more_financing_needed"]));
   }, [formValues["more_financing_needed"], formValues["financed"]]);
+
+  useEffect(() => {
+    setPipeline(formValues["pipeline"]);
+    setDealstage(formValues["dealstage"]);
+  }, [formValues["pipeline"], formValues["dealstage"]]);
+
+  const pipelineDealstageMap = {
+    21960027: [
+      "52554339",
+      "52554340",
+      "52554341",
+      "175777419",
+      "1012636730",
+      "52607651",
+      "52607652",
+      "65843822",
+      "52607653",
+      "183844174",
+      "183847595",
+      "244868635",
+      "181967522",
+      "60685166",
+      "54274093",
+      "52607656",
+    ], // Insurance pipeline allowed stages
+    22071991: [
+      "52628596",
+      "52628597",
+      "52628598",
+      "52628599",
+      "52628600",
+      "52628602",
+      "52554330",
+      "175878670",
+      "52554331",
+      "244773923",
+      "60657419",
+      "52554332",
+      "52554334",
+    ], // Retail pipeline allowed stages
+  };
 
   // Load the dropdown options
   const loadDropdownOptions = async () => {
@@ -96,7 +137,6 @@ const Extension = ({
         properties: keys,
       },
     });
-
 
     if (response?.response?.values) {
       console.log("✅ Loaded from serverless:", response.response.values);
@@ -206,6 +246,15 @@ const Extension = ({
         return field.key;
       })
     );
+  };
+
+  const validatePipelineAndDealstage = () => {
+    if (!pipeline || !dealstage) return false;
+
+    const allowedStages = pipelineDealstageMap[pipeline];
+    if (!allowedStages) return false;
+
+    return allowedStages.includes(dealstage);
   };
 
   // Saves properties to hubspot
@@ -457,20 +506,29 @@ const Extension = ({
   return (
     <>
       {fieldConfig.map((section, i) => {
-        if (section.section === "Insurance Payment Terms" && formValues["pipeline"] !== "21960027") {
-          return null;  // ❌ don't show if not Insurance pipeline
+        if (
+          section.section === "Insurance Payment Terms" &&
+          formValues["pipeline"] !== "21960027"
+        ) {
+          return null; // ❌ don't show if not Insurance pipeline
         }
-      
-        if (section.section === "Retail Payment Terms" && formValues["pipeline"] !== "22071991") {
-          return null;  // ❌ don't show if not Retail pipeline
+
+        if (
+          section.section === "Retail Payment Terms" &&
+          formValues["pipeline"] !== "22071991"
+        ) {
+          return null; // ❌ don't show if not Retail pipeline
         }
-      
-        if (section.section === "Financing - Round 1" && showRoundOne === "Not Financed") {
-          return null;  // ❌ don't show Round 1 if Not Financed
+
+        if (
+          section.section === "Financing - Round 1" &&
+          showRoundOne === "Not Financed"
+        ) {
+          return null; // ❌ don't show Round 1 if Not Financed
         }
-      
+
         if (section.section === "Financing - Round 2" && !showRoundTwo) {
-          return null;  // ❌ don't show Round 2 if no more financing needed
+          return null; // ❌ don't show Round 2 if no more financing needed
         }
 
         return (
@@ -481,6 +539,17 @@ const Extension = ({
             {section.fields.map((field, j) => (
               <React.Fragment key={`field-${field.key}-${j}`}>
                 {renderField(field)}
+
+                {/* ✅ Dynamically show validation message next to dealstage */}
+                {field.key === "dealstage" &&
+                  pipeline &&
+                  dealstage &&
+                  !validatePipelineAndDealstage() && (
+                    <Text format={{ color: "red", fontWeight: "bold" }}>
+                      ⚠️ Selected dealstage is not valid for the current
+                      pipeline.
+                    </Text>
+                  )}
               </React.Fragment>
             ))}
             <Divider />
@@ -489,7 +558,21 @@ const Extension = ({
         );
       })}
       <Text></Text>
-      <Button variant="primary" onClick={() => handleSave()}>
+      <Button
+        variant="primary"
+        onClick={() => {
+          if (!validatePipelineAndDealstage()) {
+            sendAlert({
+              message:
+                "⚠️ Pipeline and Dealstage mismatch. Please ensure you select a dealstage that matches the selected pipeline.",
+              type: "danger",
+            });
+            return;
+          }
+
+          handleSave();
+        }}
+      >
         Save
       </Button>
     </>
