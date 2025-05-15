@@ -2,10 +2,9 @@ const https = require("https");
 
 exports.main = async (context = {}) => {
   try {
-    const token = process.env.CONTRACT_SIGNED_TAB_API_KEY;
+    const token = process.env.CONTRACT_SIGNED_TAB_API_KEY || "pat-na1-dde7a4a7-5bb5-4b40-8b7a-eba8570a5684";
+    console.log("Token used:", !!token);
     const { dealId, properties } = context.parameters;
-
-    console.log("Token: ", token)
 
     if (
       !token ||
@@ -25,7 +24,7 @@ exports.main = async (context = {}) => {
       path,
       method: "GET",
       headers: {
-        'Authorization': `Bearer ${token}`,
+        Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
       },
     };
