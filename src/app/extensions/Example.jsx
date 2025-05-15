@@ -575,6 +575,7 @@ const Extension = ({
       >
         Save
       </Button>
+      <Text>Main Version</Text>
     </>
   );
 };
