@@ -10,7 +10,7 @@
     },
     "getDealProperties": {
       "file": "getDealProperties.js",
-      "secrets": []
+      "secrets": ["CONTRACT_SIGNED_TAB_KEY"]
     },
     "uploadFile": {
       "file": "uploadFile.js",

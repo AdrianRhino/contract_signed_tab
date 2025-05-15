@@ -6,7 +6,7 @@ exports.main = async (context = {}) => {
     const { dealId, properties } = context.parameters;
     console.log(`Token: ${process.env['CONTRACT_SIGNED_TAB_KEY']}`,)
     console.log(`Token a: ${process.env.CONTRACT_SIGNED_TAB_KEY}`,)
-    console.log(`Token2: ${process.env['HUBSPOT_API_KEY']}`)
+    console.log(`Token2: ${process.env["HUBSPOT_API_KEY"]}`)
     console.log(`Token2a: ${process.env.HUBSPOT_API_KEY}`)
     console.log("🔍 Token exists:", !!process.env.CONTRACT_SIGNED_TAB_API_KEY);
     if (
