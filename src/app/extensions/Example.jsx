@@ -131,6 +131,11 @@ const Extension = ({
       )
       .filter(Boolean);
 
+      console.log("🔎 Deal Properties Request Payload:", {
+  dealId: context?.crm?.objectId,
+  properties: keys,
+});
+
     const response = await runServerless({
       name: "getDealProperties",
       parameters: {
