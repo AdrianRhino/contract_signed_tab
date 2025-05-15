@@ -2,11 +2,11 @@
   "appFunctions": {
     "myFunc": {
       "file": "example-function.js",
-      "secrets": []
+      "secrets": ["CONTRACT_SIGNED_TAB_KEY"]
     },
     "saveDealProperties": {
       "file": "saveDealProperties.js",
-      "secrets": []
+      "secrets": ["CONTRACT_SIGNED_TAB_KEY"]
     },
     "getDealProperties": {
       "file": "getDealProperties.js",
@@ -14,7 +14,7 @@
     },
     "uploadFile": {
       "file": "uploadFile.js",
-      "secrets": []
+      "secrets": ["CONTRACT_SIGNED_TAB_KEY"]
     }
   }
 }
