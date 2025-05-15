@@ -10,7 +10,7 @@ exports.main = async (context = {}) => {
       return { error: "Missing or invalid parameters" };
     }
 
-    const path = `/crm/v3/objects/deals/${dealId}?properties=${properties.join(",")}`;
+  const path = `/crm/v3/objects/deals/${dealId}?properties=${encodeURIComponent(properties.join(","))}`;
     const options = {
       hostname: "api.hubapi.com",
       path,
