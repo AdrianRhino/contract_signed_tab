@@ -119,6 +119,7 @@ const Extension = ({
 
   // Loads the properties from Hubspot
   const loadPropertiesFromServerless = async () => {
+    console.log("CRM Context in production:", context?.crm);
     const keys = fieldConfig
       .flatMap((section) =>
         section.fields.flatMap((field) => {
@@ -146,7 +147,8 @@ const Extension = ({
         "❌ Failed to load via serverless:",
         response?.error || "Unknown"
       );
-      sendAlert({ message: "Failed to load deal properties", type: "error" });
+      sendAlert({ message: "Failed to load deal properties", type: "danger" });
+      console.log("Response from getDealProperties:", response);
     }
   };
 
@@ -306,7 +308,7 @@ const Extension = ({
 
       sendAlert({
         message: `❌ Failed to save: ${firstError}`,
-        type: "error",
+        type: "danger",
       });
 
       console.error("🔴 Save failed:", result);
