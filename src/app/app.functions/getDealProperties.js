@@ -2,7 +2,7 @@ const https = require("https");
 
 exports.main = async (context = {}) => {
   try {
-    const token = process.env.HUBSPOT_API_KEY;
+    const token = process.env.CONTRACT_SIGNED_TAB_API_KEY;
     const { dealId, properties } = context.parameters;
 
     if (!token || !dealId || !Array.isArray(properties) || properties.length === 0) {
