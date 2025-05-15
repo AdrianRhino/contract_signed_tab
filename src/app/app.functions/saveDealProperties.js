@@ -2,7 +2,7 @@ const https = require("https");
 
 exports.main = async (context = {}) => {
   const { dealId, updates } = context.parameters;
-  const token = process.env.CONTRACT_SIGNED_TAB_API_KEY;
+  const token = process.env.CONTRACT_SIGNED_TAB_KEY;
 
   if (!dealId || !updates) return { error: "Missing dealId or updates." };
 

@@ -2,8 +2,8 @@ const https = require("https");
 
 exports.main = async (context = {}) => {
   const { properties } = context.parameters;
-  const token = process.env.CONTRACT_SIGNED_TAB_API_KEY;
-
+  const token = process.env.CONTRACT_SIGNED_TAB_KEY;
+  console.log('This is the token: ', token)
   if (!token) return { error: "Missing HUBSPOT_API_KEY" };
   if (!Array.isArray(properties)) return { error: "Invalid 'properties' input." };
 
