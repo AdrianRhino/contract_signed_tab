@@ -119,7 +119,7 @@ const Extension = ({
 
   // Loads the properties from Hubspot
   const loadPropertiesFromServerless = async () => {
-    console.log("CRM Context in production:", context?.crm);
+    console.log("CRM Context in production:", context);
     const keys = fieldConfig
       .flatMap((section) =>
         section.fields.flatMap((field) => {
