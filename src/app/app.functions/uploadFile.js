@@ -1,9 +1,9 @@
 const https = require("https");
 
 exports.main = async (context) => {
-    const token = process.env.HUBSPOT_API_KEY;
+    const token = process.env.CONTRACT_SIGNED_TAB_API_KEY;
     const { fileName, base64, mimeType } = context.parameters;
-  
+    console.log("Testing app rebuild")
     const options = {
       hostname: "api.hubapi.com",
       path: "/files/v3/files",
