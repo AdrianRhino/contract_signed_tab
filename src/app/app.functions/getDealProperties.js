@@ -4,6 +4,7 @@ exports.main = async (context = {}) => {
   try {
     const token = process.env.CONTRACT_SIGNED_TAB_KEY;
     const { dealId, properties } = context.parameters;
+    console.log("🔍 Available env keys:", Object.keys(process.env));
     console.log("🔍 Token exists:", !!process.env.CONTRACT_SIGNED_TAB_API_KEY);
     if (
       !token ||
