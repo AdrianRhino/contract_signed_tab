@@ -17,19 +17,19 @@
       {
         "key": "amount",
         "label": "Amount",
-        "type": "number",
+        "type": "currency",
         "required": false
       },
       {
         "key": "pipeline",
         "label": "Pipeline",
-        "type": "dropdown",
+        "type": "read-only-dropdown",
         "required": false
       },
       {
         "key": "dealstage",
         "label": "Deal Stage",
-        "type": "dropdown",
+        "type": "read-only-dropdown",
         "required": false
       },
       {
@@ -63,7 +63,7 @@
       {
         "key": "financed_amount",
         "label": "Financed Amount (1)",
-        "type": "number",
+        "type": "currency",
         "required": false
       },
       {
@@ -108,7 +108,7 @@
       {
         "key": "financed_amount_2",
         "label": "Financed Amount (2)",
-        "type": "number",
+        "type": "currency",
         "required": false
       },
       {

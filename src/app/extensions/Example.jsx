@@ -14,6 +14,7 @@ import {
   MultiSelect,
   Modal,
   ModalBody,
+  Flex,
 } from "@hubspot/ui-extensions";
 
 import fields from "./config/fields.json";
@@ -45,6 +46,7 @@ const Extension = ({
   const [showRoundTwo, setShowRoundTwo] = useState();
   const [pipeline, setPipeline] = useState();
   const [dealstage, setDealstage] = useState();
+  const [fieldWarnings, setFieldWarnings] = useState({});
 
   // Upon loading load the previous fields and drop down options
   useEffect(() => {
@@ -131,10 +133,10 @@ const Extension = ({
       )
       .filter(Boolean);
 
-      console.log("🔎 Deal Properties Request Payload:", {
-  dealId: context?.crm?.objectId,
-  properties: keys,
-});
+    console.log("🔎 Deal Properties Request Payload:", {
+      dealId: context?.crm?.objectId,
+      properties: keys,
+    });
 
     const response = await runServerless({
       name: "getDealProperties",
@@ -167,11 +169,20 @@ const Extension = ({
 
   // Handle any property changes, maybe change to blur method (currently it prints on every keystroke and is annoying)
   const handleChange = (key, value) => {
+    const containsLetters = typeof value === "string" && /[a-zA-Z]/.test(value);
+
     setFormValues((prev) => {
       const updated = { ...prev, [key]: value };
       console.log("Updated form values:", updated);
       return updated;
     });
+
+    setFieldWarnings((prev) => ({
+      ...prev,
+      [key]: containsLetters
+        ? "⚠️ Letters are not allowed in this field."
+        : null,
+    }));
   };
 
   // Prepares data to then send to hubspot
@@ -451,6 +462,39 @@ const Extension = ({
           />
         );
 
+      case "read-only-dropdown":
+        return (
+          <Select
+            label={field.label}
+            name={field.key}
+            options={dropdownOptions[field.key] || []}
+            value={value}
+            readOnly={true}
+            placeholder={`Choose ${field.label}`}
+            onChange={(val) => handleChange(field.key, val)}
+          />
+        );
+
+      case "currency":
+        return (
+          <>
+            <Flex gap="small" align="center">
+              <Text>$</Text>
+              <NumberInput
+                label={field.label}
+                precision={2}
+                formatStyle="decimal"
+                placeholder={`Enter ${field.label}`}
+                value={formValues[field.key] ?? ""}
+                onChange={(val) => handleChange(field.key, val)}
+              />
+              {fieldWarnings[field.key] && (
+                <Text>{fieldWarnings[field.key]}</Text>
+              )}
+            </Flex>
+          </>
+        );
+
       case "action-button":
         return (
           <>
@@ -529,7 +573,7 @@ const Extension = ({
 
         if (
           section.section === "Financing - Round 1" &&
-          showRoundOne === "Not Financed"
+          (!showRoundOne || showRoundOne === "Not Financed")
         ) {
           return null; // ❌ don't show Round 1 if Not Financed
         }
@@ -582,7 +626,6 @@ const Extension = ({
       >
         Save
       </Button>
-      <Text>Main Version</Text>
     </>
   );
 };
