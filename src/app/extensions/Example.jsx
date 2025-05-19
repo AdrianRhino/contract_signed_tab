@@ -480,18 +480,18 @@ const Extension = ({
           <>
             <Flex gap="small" align="center">
               <Text>$</Text>
-              <NumberInput
-                label={field.label}
-                precision={2}
-                formatStyle="decimal"
-                placeholder={`Enter ${field.label}`}
-                value={formValues[field.key] ?? ""}
-                onChange={(val) => handleChange(field.key, val)}
-              />
-              {fieldWarnings[field.key] && (
-                <Text>{fieldWarnings[field.key]}</Text>
-              )}
+                <NumberInput
+                  label={field.label}
+                  precision={2}
+                  formatStyle="decimal"
+                  placeholder={`Enter ${field.label}`}
+                  value={formValues[field.key] ?? ""}
+                  onChange={(val) => handleChange(field.key, val)}
+                />
             </Flex>
+            {fieldWarnings[field.key] && (
+              <Text>{fieldWarnings[field.key]}</Text>
+            )}
           </>
         );
 
