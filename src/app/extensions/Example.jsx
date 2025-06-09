@@ -338,6 +338,24 @@ const Extension = ({
   const renderField = (field) => {
     const value = formValues[field.key] || "";
 
+   const getMinDate = (field) => {
+  if (field.minDate) {                // ← simpler check
+    const today = new Date();
+    const min = {
+      year: today.getFullYear(),
+      month: today.getMonth(),    // JS months are 0-based
+      date: today.getDate(),
+    };
+    console.log('minDate is true →', min);
+    return min;                       // useful later
+  } else {
+    console.log('minDate is false');
+  return undefined;                   // no lower bound
+  }
+
+  
+};
+
     switch (field.type) {
       case "Multi-line text":
         return (
@@ -407,6 +425,7 @@ const Extension = ({
             onChange={(val) => handleChange(field.key, val)}
             value={getDateInputValue(formValues[field.key])}
             format="long"
+            min={getMinDate(field)}
           />
         );
 
@@ -480,14 +499,14 @@ const Extension = ({
           <>
             <Flex gap="small" align="center">
               <Text>$</Text>
-                <NumberInput
-                  label={field.label}
-                  precision={2}
-                  formatStyle="decimal"
-                  placeholder={`Enter ${field.label}`}
-                  value={formValues[field.key] ?? ""}
-                  onChange={(val) => handleChange(field.key, val)}
-                />
+              <NumberInput
+                label={field.label}
+                precision={2}
+                formatStyle="decimal"
+                placeholder={`Enter ${field.label}`}
+                value={formValues[field.key] ?? ""}
+                onChange={(val) => handleChange(field.key, val)}
+              />
             </Flex>
             {fieldWarnings[field.key] && (
               <Text>{fieldWarnings[field.key]}</Text>
