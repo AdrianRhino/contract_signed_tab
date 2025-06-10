@@ -214,7 +214,7 @@
       },
       {
         "key": "homeowner_understands_payment_terms",
-        "label": "Does homeowner understand the payment terms?",
+        "label": "Does the homeowner need management explanation of payment terms? Click here.",
         "type": "checkbox",
         "required": false
       },
