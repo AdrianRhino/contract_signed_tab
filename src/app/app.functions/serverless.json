@@ -2,11 +2,15 @@
   "appFunctions": {
     "myFunc": {
       "file": "example-function.js",
-<<<<<<< HEAD
-      "secrets": ["CONTRACT_SIGNED_TAB_KEY", "SRSID_STAGING", "SRSSECRET_STAGING", "beaconUsername", "beaconPass"]
-=======
-      "secrets": ["CONTRACT_SIGNED_TAB_KEY","ABCKEY_PROD"]
->>>>>>> 62abc3989e73b65a29194e2d47afaaf413ebc0a1
+
+      "secrets": [
+        "CONTRACT_SIGNED_TAB_KEY",
+         "SRSID_STAGING",
+          "SRSSECRET_STAGING",
+           "beaconUsername",
+            "beaconPass", 
+            "ABCKEY_PROD"
+          ]
     },
     "saveDealProperties": {
       "file": "saveDealProperties.js",
