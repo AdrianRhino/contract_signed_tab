@@ -6,6 +6,10 @@ exports.main = async (context = {}) => {
   if (!token) return { error: "Missing CONTRACT_SIGNED_TAB_KEY" };
   if (!Array.isArray(properties)) return { error: "Invalid 'properties' input." };
 
+  const abckey = process.env["ABCKEY_PROD"];
+
+  console.log("ABC Key: ", abckey)
+
   const dropdowns = {};
 
   // First: fetch all deal properties

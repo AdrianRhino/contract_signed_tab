@@ -2,7 +2,7 @@
   "appFunctions": {
     "myFunc": {
       "file": "example-function.js",
-      "secrets": ["CONTRACT_SIGNED_TAB_KEY"]
+      "secrets": ["CONTRACT_SIGNED_TAB_KEY","ABCKEY_PROD"]
     },
     "saveDealProperties": {
       "file": "saveDealProperties.js",

@@ -6,7 +6,8 @@
         "key": "project_sold_date",
         "label": "Project Sold Date",
         "type": "date",
-        "required": false
+        "required": false,
+        "minDate": true
       },
       {
         "key": "job_type",
@@ -70,7 +71,8 @@
         "key": "date_financed",
         "label": "Loan Signed Date (1)",
         "type": "date",
-        "required": false
+        "required": false,
+        "minDate": true
       },
       {
         "key": "finance_options",
@@ -115,7 +117,8 @@
         "key": "date_financed_2",
         "label": "Loan Signed Date (2)",
         "type": "date",
-        "required": false
+        "required": false,
+        "minDate": true
       },
       {
         "key": "finance_options_2",
@@ -211,7 +214,7 @@
       },
       {
         "key": "homeowner_understands_payment_terms",
-        "label": "Does homeowner understand the payment terms?",
+        "label": "Does the homeowner need management explanation of payment terms? Click here.",
         "type": "checkbox",
         "required": false
       },
@@ -262,7 +265,7 @@
       },
       {
         "key": "homeowner_understands_payment_terms",
-        "label": "Does homeowner understand the payment terms?",
+        "label": "Does the homeowner need management explanation of payment terms? Click here.",
         "type": "checkbox",
         "required": false
       },
