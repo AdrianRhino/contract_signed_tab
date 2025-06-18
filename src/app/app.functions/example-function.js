@@ -6,6 +6,7 @@ exports.main = async (context = {}) => {
   if (!token) return { error: "Missing CONTRACT_SIGNED_TAB_KEY" };
   if (!Array.isArray(properties)) return { error: "Invalid 'properties' input." };
 
+<<<<<<< HEAD
   const srsid = process.env["SRSID_STAGING"]
   const srssecret = process.env["SRSSECRET_STAGING"]
   const beaconUsername = process.env["beaconUsername"]
@@ -15,6 +16,11 @@ exports.main = async (context = {}) => {
   console.log("SRSSECRET_STAGING: ", srssecret)
   console.log("beaconUsername: ", beaconUsername)
   console.log("beaconPass: ", beaconPass)
+=======
+  const abckey = process.env["ABCKEY_PROD"];
+
+  console.log("ABC Key: ", abckey)
+>>>>>>> 62abc3989e73b65a29194e2d47afaaf413ebc0a1
 
   const dropdowns = {};
 
