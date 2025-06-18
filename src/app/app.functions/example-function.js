@@ -6,6 +6,16 @@ exports.main = async (context = {}) => {
   if (!token) return { error: "Missing CONTRACT_SIGNED_TAB_KEY" };
   if (!Array.isArray(properties)) return { error: "Invalid 'properties' input." };
 
+  const srsid = process.env["SRSID_STAGING"]
+  const srssecret = process.env["SRSSECRET_STAGING"]
+  const beaconUsername = process.env["beaconUsername"]
+  const beaconPass = process.env["beaconPass"]
+
+  console.log("SRSID_STAGING: ", srsid)
+  console.log("SRSSECRET_STAGING: ", srssecret)
+  console.log("beaconUsername: ", beaconUsername)
+  console.log("beaconPass: ", beaconPass)
+
   const dropdowns = {};
 
   // First: fetch all deal properties

@@ -2,7 +2,7 @@
   "appFunctions": {
     "myFunc": {
       "file": "example-function.js",
-      "secrets": ["CONTRACT_SIGNED_TAB_KEY"]
+      "secrets": ["CONTRACT_SIGNED_TAB_KEY", "SRSID_STAGING", "SRSSECRET_STAGING", "beaconUsername", "beaconPass"]
     },
     "saveDealProperties": {
       "file": "saveDealProperties.js",
